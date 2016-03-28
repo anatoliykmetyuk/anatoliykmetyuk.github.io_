@@ -1,7 +1,7 @@
 # Theme customization - please change from the defaults!
 
 # Color for top bar, links, etc
-theme_color  : '#e69900'
+theme_color  : '#e68a00'
 link_color   : '#3498db'
 hover_color  : '#e69900'
 visited_color: '#b30000'
@@ -12,11 +12,11 @@ social:
   #bitbucket: philipj
   #hacker_news: swanson
   #stackexchange: 348619
-  #stackoverflow: 348619
-  #twitter: _swanson
-  #facebook: zuck
+  stackoverflow: 3895471
+  twitter: AKmetyuk
+  facebook: anatoliy.kmetyuk
   #tumblr: animalygifs
-  #linkedin: philipjagielski
+  linkedin: anatoliy-kmetyuk-97643562
   #gplus: 110552447039675960964
   #gravatar: 86e6ff8f75f9daef42d53b7f8002fd95
   #flickr: johndoe
