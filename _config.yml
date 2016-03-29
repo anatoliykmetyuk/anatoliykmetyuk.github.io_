@@ -5,3 +5,7 @@ lsi: false
 exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
 
 paginate: 25
+
+markdown: redcarpet
+redcarpet:
+  extensions: ["strikethrough"]

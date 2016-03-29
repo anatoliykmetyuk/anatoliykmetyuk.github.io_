@@ -14,7 +14,7 @@ social:
   #stackexchange: 348619
   stackoverflow: 3895471
   twitter: AKmetyuk
-  facebook: anatoliy.kmetyuk
+  #facebook: anatoliy.kmetyuk
   #tumblr: animalygifs
   linkedin: anatoliy-kmetyuk-97643562
   #gplus: 110552447039675960964
@@ -24,7 +24,7 @@ social:
 # "Hi, I'm _______"
 name: Anatolii Kmetiuk
 email: anatoliykmetyuk@gmail.com
-tagline: "weak opinions, strongly held"
+#tagline: "weak opinions, strongly held"
 
 # Google Analytics key, leave blank to ignore
 google_analytics_key:
