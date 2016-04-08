@@ -1,6 +1,6 @@
 ---
 layout: post
-title: SubScript&#58; A Brief Progress Report 
+title: SubScript - A Brief Progress Report 
 categories:
 - blog
 ---
