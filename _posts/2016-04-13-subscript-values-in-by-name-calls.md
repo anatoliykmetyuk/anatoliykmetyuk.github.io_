@@ -26,7 +26,7 @@ This approach, however, is not thread safe. The following `live` script, for exa
 ```scala
 script live =
   val a = 3
-  f(println(_a))
+  f(println(a))
   {..}
 
 def f(task: => Unit) = new Thread (new Runnable {override def run {
