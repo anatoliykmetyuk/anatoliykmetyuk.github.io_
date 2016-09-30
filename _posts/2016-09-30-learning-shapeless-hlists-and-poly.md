@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Learning Shapeless&#58; HLists and Poly
+title: Learning Shapeless&#58; HLists
 categories:
 - blog
 ---
@@ -79,6 +79,7 @@ With `::`, it is possible to construct lists by induction:
 This pattern of building types inductively is observed in many parts of Shapeless. It allows to use simple primitives and inductive definitions to build complex types on compile time recursively.
 
 # List operations
+
 ## Architecture
 To learn about what you can do with `HLists`, you'll want to have look at HList's [syntax](https://github.com/milessabin/shapeless/blob/master/core/src/main/scala/shapeless/syntax/hlists.scala) and [operations](https://github.com/milessabin/shapeless/blob/master/core/src/main/scala/shapeless/ops/hlists.scala) sources. Since there are a lot of operations defined there, it makes sense to understand the general architecture and patterns that are used.
 
