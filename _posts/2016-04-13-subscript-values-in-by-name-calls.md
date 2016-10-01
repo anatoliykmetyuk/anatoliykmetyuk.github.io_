@@ -13,17 +13,17 @@ In other words, evaluation of `val`s and `var`s requires a scope of the node whe
 
 For example, the following script:
 
-```scala
+{% highlight scala %}
 script live =
   val a = 3
   println(a)
-```
+{% endhighlight %}
 
 will consist of a sequence operator node with two children. The first child, `val a = 3`, will write to the sequence's map that `a` has a value of `3`. The second child, `println(a)`, will request this data and output it.
 
 This approach, however, is not thread safe. The following `live` script, for example, will fail:
 
-```scala
+{% highlight scala %}
 script live =
   val a = 3
   f(println(a))
@@ -33,7 +33,7 @@ def f(task: => Unit) = new Thread (new Runnable {override def run {
   Thread.sleep(1000)
   task
 }}).start()
-```
+{% endhighlight %}
 
 When the new thread created by `f` calls `task` (which is `println(a)`), an attempt to resolve `a` is made. Since its value is stored in the sequential operator's node (the topmost one in the tree), we need an access to it. But on the resolution time the link between the `f(println(a))` child and the sequential parent node is broken, since this child was deactivated after successful execution.
 
@@ -43,7 +43,7 @@ Concretely, in ScalaFX the GUI-related calls should be done from GUI thread via 
 
 The workaround is rather simple: we need to evaluate the reference that requires the scope while still in scope, and then pass its value outside the scope. In SubScript case, the solution is as follows:
 
-```scala
+{% highlight scala %}
 script live =
     val a = 3
     {!val _a = a; f(println(_a))!}
@@ -53,4 +53,4 @@ def f(task: => Unit) = new Thread (new Runnable {override def run {
   Thread.sleep(1000)
   task
 }}).start()
-```
+{% endhighlight %}
