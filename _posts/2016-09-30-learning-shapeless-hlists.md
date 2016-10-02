@@ -180,8 +180,8 @@ This concludes a brief overview of Shapeless' `HList`s. Main points covered:
 
 - Shapeless makes programs more type-safe, hence decreasing the risk of bugs.
 - Syntax of the `HList`'s operations is defined in the `HListOps` trait, and each operation method is implemented via a type class.
-- Type classes are available via `implicit def`s of the companion objects of their traits.
+- Type classes' instances are available via `implicit def`s of the companion objects of their traits.
 - The result type of the operations of a type class resolved in this manner is computed during compile time.
-- Often `implicit def`s themselves require other implicits, and the resolution goes in multiple levels. This allows inductive definitions of both runtime value computations and compile time type computations.
+- Often `implicit def`s themselves require other implicits, and the resolution passes several levels. This allows inductive definitions of both runtime value computations and compile time type computations.
 
 In the next article, I will cover Shapeless polymorphic functions, their architecture and how they can be used with `HList`s.
