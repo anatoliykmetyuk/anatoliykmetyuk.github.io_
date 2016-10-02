@@ -8,7 +8,7 @@ Shapeless is a Scala library that aims to make programming more type-safe. This 
 
 Since a lot of the information about a program is represented by types, Shapeless utilises them heavily to achieve its goal.
 
-In this post, I will cover the basics of Shapeless's `HList`s.
+In this post, I will cover the basics of Shapeless' `HList`s.
 
 # Introduction
 An `HList` is a heterogenous list. It is a generalisation of Scala's tuples. While ordinary Scala `List`s can contain only elements of one type (`List[Int]` for `Int`s, `List[String]` for `String`s etc), `HLists` can contain many. This is done in a type-safe way: The compiler knows about the types of the elements in the list.
@@ -40,7 +40,7 @@ scala> HNil.head
        HNil.head
 {% endhighlight %}
 
-A normal Scala `List` throws an exception during runtime, but in case of `HNil`, a compilation error happens. Hence, with a `List` you won't know about the error until you run the program and this code line gets executed. In case of `HList`, the error will be identified during the compilation, allowing you to fix it right away and reduce potential bugs.
+A normal Scala `List` throws an exception during runtime, but in case of `HNil`, a compilation error happens. Hence, with a `List` you won't know about the error until you run the program and this code line gets executed. In case of `HList`, the error will be identified during the compilation, allowing you to fix it right away and reduce the risk of bugs.
 
 ## HList architecture
 Consider our previous example:
@@ -98,8 +98,6 @@ This method returns a first element of a list. Some observations to make here:
 - This type class is parameterised by `L` which is the type of the `HList` the operation is called on. This is how Shapeless provides type safety: If there is no appropriate type class for `L` in scope, the operation is impossible and a compile-time error will happen.
 - The return type `c.H` of the method is defined by the type class. Hence the logic responsible for `implicit` resolution is also responsible for the output type computation. The more complex this logic is, the more complex computations with types are possible during compile time.
 
-TODO Provide code example to illustrate those three points
-
 ### Operations
 The [operations](https://github.com/milessabin/shapeless/blob/master/core/src/main/scala/shapeless/ops/hlists.scala) file contains all the type classes required by the `syntax`: their `trait`s and `implicit def`s to resolve them.
 
@@ -141,15 +139,7 @@ Some observations to make here:
 ## The head of an empty list example internals
 Consider our example with a head of an empty list discussed above. How exactly does the compiler verify that an operation is possible for `Int :: HNil`, but is not possible in case of `HNil`?
 
-First, the target `HList` is converted implicitly to `HListOps`, which has the method `head`:
-
-{% highlight scala %}
-def head(implicit c : IsHCons[L]) : c.H = c.head(l)
-{% endhighlight %}
-
-TODO This function is repeated from above
-
-This method can be called only if the type class it requires can be found.
+First, the target `HList` is converted implicitly to `HListOps`, which has the method `head`. This method can be called only if the type class it requires can be found.
 
 There is one `implicit def` in the companion object of `IsHCons`. It has the following signature:
 
@@ -159,7 +149,7 @@ implicit def hlistIsHCons[H0, T0 <: HList]: IsHCons.Aux[H0 :: T0, H0, T0]
 
 In case of `Int :: HNil`, the required type is `IsHCons[Int :: HNil]` and `IsHCons.Aux[H0 :: T0, H0, T0]` conforms to it because this type is an alias for `IsHCons[H0 :: T0]` with `H0` and `T0` output types (one for the head and one for the tail). So the implicit is found and the compilation succeeds.
 
-In case of `HNil`, however, the required type class has the type of `IsHCons[HNil]`. Since `IsHCons.Aux[H0 :: T0, H0, T0]` does not conform to this type (`HNil` cannot be represented as `H0 :: T0`). The compiler cannot find the type class and the compilation fails.
+In case of `HNil`, however, the required type class has the type of `IsHCons[HNil]`. Since `IsHCons.Aux[H0 :: T0, H0, T0]` does not conform to this type (`HNil` cannot be represented as `H0 :: T0`), the compiler cannot find the type class and the compilation fails.
 
 ## Length of `HList`s and type-level natural numbers
 Recall that the output types of the `HList` operations are often defined by the type classes, which are resolved implicitly. Hence, one can argue that the output types are computed by the same capabilities that resolve the implicits, and the complexity of the computations you can perform with the types in such a manner is proportional to the complexity of the implicits' resolution mechanics.
@@ -185,4 +175,4 @@ The recursive nature of the resolution of implicits and the fact that the comput
 
 Now, the length of `HNil` is `_0` in `Length.Aux[L <: HNil, _0]`. The input type is `L` and the output is `_0`. The length of `H :: T` given `T <: HList` is `Succ[N]`, where `N` is bound by `Length.Aux[T, N]`.
 
-TODO Abrupt ending
+This concludes a brief overview of Shapeless' `HList`s. In the next article, I will cover Shapeless polymorphic functions, their architecture and how they can be used with `HList`s.
