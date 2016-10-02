@@ -139,7 +139,7 @@ Some observations to make here:
 ## The head of an empty list example internals
 Consider our example with a head of an empty list discussed above. How exactly does the compiler verify that an operation is possible for `Int :: HNil`, but is not possible in case of `HNil`?
 
-First, the target `HList` is converted implicitly to `HListOps`, which has the method `head`. This method can be called only if the type class it requires can be found.
+First, the target `HList` is converted implicitly to `HListOps`, which has the method `head`. This method can be called only if the scope defines the required type class.
 
 There is one `implicit def` in the companion object of `IsHCons`. It has the following signature:
 
@@ -175,4 +175,13 @@ The recursive nature of the resolution of implicits and the fact that the comput
 
 Now, the length of `HNil` is `_0` in `Length.Aux[L <: HNil, _0]`. The input type is `L` and the output is `_0`. The length of `H :: T` given `T <: HList` is `Succ[N]`, where `N` is bound by `Length.Aux[T, N]`.
 
-This concludes a brief overview of Shapeless' `HList`s. In the next article, I will cover Shapeless polymorphic functions, their architecture and how they can be used with `HList`s.
+# Conclusion
+This concludes a brief overview of Shapeless' `HList`s. Main points covered:
+
+- Shapeless makes programs more type-safe, hence decreasing the risk of bugs.
+- Syntax of the `HList`'s operations is defined in the `HListOps` trait, and each operation method is implemented via a type class.
+- Type classes are available via `implicit def`s of the companion objects of their traits.
+- The result type of the operations of a type class resolved in this manner is computed during compile time.
+- Often `implicit def`s themselves require other implicits, and the resolution goes in multiple levels. This allows inductive definitions of both runtime value computations and compile time type computations.
+
+In the next article, I will cover Shapeless polymorphic functions, their architecture and how they can be used with `HList`s.
