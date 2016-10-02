@@ -1,7 +1,7 @@
 # Theme customization - please change from the defaults!
 
 # Color for top bar, links, etc
-theme_color  : '#e68a00'
+theme_color  : '#000000' #'#e68a00'
 link_color   : '#3498db'
 hover_color  : '#e69900'
 visited_color: '#b30000'
