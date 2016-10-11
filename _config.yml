@@ -12,3 +12,6 @@ kramdown:
   syntax_highlighter: rouge
 # redcarpet:
 #   extensions: ["strikethrough"]
+
+gems:
+  - jekyll-redirect-from
