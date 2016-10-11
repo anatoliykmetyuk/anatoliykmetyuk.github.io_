@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Learning Shapeless&#58; HLists
+title: Dissecting Shapeless&#58; HLists
 categories:
 - blog
 ---

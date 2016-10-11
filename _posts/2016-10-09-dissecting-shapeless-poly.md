@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Learning Shapeless&#58; Poly
+title: Dissecting Shapeless&#58; Poly
 categories:
 - blog
 ---
@@ -48,19 +48,33 @@ object AdHocPoly extends App {
 
 A polymorphic function has the ability to be called with arguments of different types, possibly also returning values of different types.
 
-Shapeless' `Poly` treats a computation on an argument from a particular domain `In` as a *behaviour* on that domain: Every value `v: In` can be computed, yielding a result of type `Out`. This means that it can be encapsulated into a type class, `Case[In]`. Then, to call a function on some arbitrary type `T`, one needs to implicitly look up the type class `Case[T]` and delegate the work (including determining the result type of the computation) to it — this is how the `apply` method of `Poly` works.
+Shapeless' `Poly` treats a computation on an argument from a particular domain `In` as a *behaviour* on that domain: On every value `v: In`, it is possible to run a computation that yields a result of type `Out`. This means that it can be encapsulated into a type class, `Case[In]`. Then, to call a function on some arbitrary type `T`, one needs to implicitly look up the type class `Case[T]` and delegate the work (including determining the result type of the computation) to it — this is how the `apply` method of `Poly` works.
 
-To separate implicit `Case` instances of one `Poly` from those of others, `Case`s are further parameterised by the singleton type of the `Poly` they belong to: `Case[F, In]`. The `Poly` trait's `apply` method requires an implicit `Case` of the singleton type of that very `Poly`. This way, it is not possible to use a `Case[f.type, _]` to call any other function but `f`, because only `f` accepts a `Case` parameterised by `f.type`. You can think of it as a mark of ownership, tagging a `Case` as a property of a certain `Poly`.
+To separate implicit `Case` instances of one `Poly` from those of others, `Case`s are further parameterised by the singleton type of the `Poly` they belong to: `Case[F, In]`. The `Poly` trait's `apply` method requires an implicit `Case` of the singleton type of that very `Poly`. This way, it is not possible to use a `Case[f.type, _]` to call any other function but `f`, because only `f` accepts a `Case` parameterised by `f.type`. For example:
 
-Parameterising `Case`s with the type of the `Poly` they belong to has one more benefit: It is not even needed to import implicit `Case`s before calling a `Poly` that requires them. This is due to  the fact that the compiler looks for the implicits in the companion objects of the types of the implicit arguments, as well as the companions of their type parameters. For example, `implicitly[Foo[A, B]]` will look for an implicit of this type in the companions of `Foo`, `A` and `B`. Hence, `Case[f.type, In]` will look into the companions of `Case`, `f.type` (which is simply `f`) and `In`. So, if the `Case`s are defined in the bodies of the `Poly`s they belong to, they will always be found by the implicit search when we call these `Poly`s.
+{%highlight scala%}
+object g extends Poly
+println(g(3)(f.intCase))
+{%endhighlight%}
 
-For further reading on the rules of how implicits are resolved, see the [export-hook readme](https://github.com/milessabin/export-hook#what-are-orphan-type-class-instances).
+This will produce a compile-time error:
 
+```
+[error]  found   : shapelesspoly.AdHocPoly.Case[shapelesspoly.AdHocPoly.f.type,Int]{type Out = String}
+[error]  required: shapelesspoly.AdHocPoly.Case[shapelesspoly.AdHocPoly.g.type,Int]
+[error]   println(g(3)(f.intCase))
+```
+
+If you replace `g` with `f` in this call, however, it will work fine. You can think of `F` in `Case[F, In]` as a mark of ownership, tagging a `Case` as a property of a certain `Poly`.
+
+Parameterising `Case`s with the type of the `Poly` they belong to has one more benefit: It is not even needed to import implicit `Case`s before calling a `Poly` that requires them. This is due to  the fact that the compiler looks for the implicits in the companion objects of the types of the implicit arguments, as well as the companions of their type parameters. That is, they are a part of the *implicit scope*[^1]. For example, `implicitly[Foo[A, B]]` will look for an implicit of this type in the companions of `Foo`, `A` and `B`. Hence, `Case[f.type, In]` will look into the companions of `Case`, `f.type` (which is simply `f`) and `In`. So, if the `Case`s are defined in the bodies of the `Poly`s they belong to, they will always be found by the implicit search when we call these `Poly`s.
+
+[^1]: For further reading on the implicit scope, see the [export-hook readme](https://github.com/milessabin/export-hook#what-are-orphan-type-class-instances).
 
 # Architecture
 Now let us see how the ideas described above are implemented in Shapeless.
 
-## Directory structure
+## File structure
 Let us first understand which sources define polymorphic functions. We will be looking at two root directories:
 
 - `core/src/main/scala/shapeless/` - `core` - The human-written sources, available online [here](https://github.com/milessabin/shapeless/tree/master/core/src/main/scala/shapeless).
