@@ -1,26 +1,79 @@
 ---
 layout: post
-title: Process algebra as expression rewriting
+title: Expression rewriting engine for process algebra
 categories:
 - blog
 ---
-# Process algebra as expression rewriting
+# Expression rewriting engine for process algebra
 
 This is a progress report on my attempt to model a process algebra as an expression rewriting machine. The process algebra in question is [SubScript](http://subscript-lang.org/from-acp-and-scala-to-subscript/), {E}:PAPERS which is an extension to [ACP](https://en.wikipedia.org/wiki/Algebra_of_Communicating_Processes) (it is highly recommended to familiarize yourself with ACP and [process algebras](https://en.wikipedia.org/wiki/Process_calculus) before reading this article further).
 
+## Process algebra expressions
+### Theory
+A **process algebra (PA) expression** consists of atomic actions (AAs), special operands and operators. It describes some process with the help of these elements as follows.
+
+**AAs** specify what to do, they can be executed. During their execution, side effects can occur and the result of such an execution is either **success** (denoted **ε**) if the computation proceeded as planned, or **failure (δ)** if there were errors (in JVM languages, exceptions thrown) in the process.
+
+ε and δ are two fundamental **special operands**.
+
+**Operators** define in which order AAs are to be executed and how their outcomes influence one another. The behavior of an operator is its **semantics**.
+
+### Example
+Here is an example of how this theory can be used in a context of a Scala GUI application controller. Consider a GUI application with two buttons, `first` an `second`, and a text field `textField`. If `first` button was pressed, you want to set `textField`'s text to "Hello World", if `second` was pressed - to "Something Else".
+
+This can be described by the following PA expression: `button(first) * gui {textField.text = "Hello World"} + button(second) * gui {textField.text = "Something Else"}`.
+
+Consider `button(btn)` to specify an atomic action that happens when the button `btn` is pressed. Consider `gui(code)` to specify an AA that executes `code` in the GUI thread of the GUI framework in question, and `textField.text = "foo"` is used to set the text of some GUI element visible to the user.
+
+`*` is a sequential operator, specifying that its operands should execute one after another.
+
+`+` is a choice operator, its precedence is lower than that of `*`. Given two arbitrary PA expressions as its operands, the first one to start (have an AA successfully evaluate to ε in it) will be chosen for full execution and the other one will be discarded.
+
+Hence, in the example above, if the button `first` is pressed, the following will happen:
+
+1. `button(first)` will evaluate to `ε`.
+2. Since one of its operands have started, `+` will discard the `button(second) * gui {textField.text = "Something Else"}` - now, even the user presses the `second` button, `gui {textField.text = "Something Else"}` has no chance of being executed.
+3. According to `*` in `button(first) * gui {textField.text = "Hello World"}`, its second operand must be executed after the successful execution of the first one. Since this has happened, `gui {textField.text = "Hello World"}` will be executed, setting `testField.text` to "Hello World".
+
 ## Motivation
-The idea of a process algebra engine is to translate a process algebra expression into a set of side effects that happen in a coordinated manner. Hence, the main job of such an engine is to coordinate the execution of processes to ensure that they happen in a manner described by the user. {E}:EXAMPLES
+The idea of a PA engine is to execute a PA expression according to the rules of the particular PA in question. The main job of such an engine is to implement the semantics of the PA entities - what an operator should do, how to execute an AA etc.
 
-The current [implementation](https://github.com/scala-subscript/subscript) of SubScript in Scala achieves this by employing an actor model. Every process algebra entity, such as operator or atomic action, is represented by its own node (actor) in an execution graph (actor hierarchy). Operators become actors that supervise other actors - operands of these operators.
+### Standard SubScript implementation
+The standard [implementation](https://github.com/scala-subscript/subscript) of SubScript in Scala takes the *coordinating* approach to the problem with the help of the actor model.
 
-The lower-level actors report all the events that happen to them to their supervisors, and based on this information the supervisors coordinate the execution of their subordinates. {E}:EXAMPLES,PICTURE
+Every process algebra entity, such as operator or atomic action, is represented by its own node (actor) in an execution graph (actor hierarchy). Operators become actors that supervise other actors - operands of these operators. The lower-level actors report all the events that happen to them to their supervisors, and based on this information the supervisors coordinate the execution of their subordinates.
 
-However, actors are hard to explore in mathematical fashion. This is why, the motivation for an alternative implementation of SubScript, [FreeACP](https://github.com/anatoliykmetyuk/free-acp), is to define an engine for SubScript in mathematical terms rather than engineering ones.
+### Example
+Let us have a look at how our GUI example above would have been executed in the standard implementation:
+
+1. A hierarchy of actors (nodes) is created: {E:PICTURE}
+2. When the button `first` is pressed, it sends a message to its supervising actor, `*`, which in turn forwards it to `+`. Both these actors have the information that `first` have successfully finished at this point.
+3. `+` acts upon this information by cancelling its second operand
+4. `*` acts upon this information by instantiating an actor corresponding to its second operand and sending a message to it, ordering it to start execution
+
+### Problem
+
+However, actors and communication between them are hard to explore in mathematical fashion. This is why, the motivation for an alternative implementation of SubScript, [FreeACP](https://github.com/anatoliykmetyuk/free-acp), is to define an engine for SubScript in mathematical terms rather than engineering ones.
 
 ## Theory
-While the standard implementation of SubScript uses the actor model, FreeACP rewrites SubScript expressions according to its axioms, executing side effects during these rewritings, to achieve the desired semantics.
+While the standard implementation of SubScript uses the coordinating approach discussed above, FreeACP uses the **rewriting** approach. Its idea is to rewrite SubScript expressions according to the axioms of this algebra, gradually simplifying them. Eventually, every expression is reduced to either ε or δ.
+
+In the process of rewritings, the AAs are evaluated (executed) on need and hence reduced to either ε or δ at the expense of side effects their evaluation can produce.
+
+### Example
+Let us see how our GUI example behaves under the rewriting approach.
+
+First, we need to define the axioms we are working under:
+{E:AXIOMS}
+
+Next, under the choice axiom, we need to evaluate the first AAs of both processes, see which one has completed first and rewrite the expression to the corresponding operand of choice.
+
+{E:SPECIFY AXIOMS}
+If `button(first)` was completed first, the expression will be rewritten to `ε * gui {textField.text = "Hello World"}`. In turn, it will be rewritten to just `gui {textField.text = "Hello World"}`. To rewrite this AA, we need to evaluate it first. If everything goes well, it evaluates to `ε`, and the tree is rewritten to `ε`. This way, we computed the result of the original PA expression to be `ε`.
 
 ### Suspended computations
+Some AAs can take time to evaluate. For example, in case of `button(first)`, it takes time for a user to press the button. Hence, the result of such an AA is not readily available. However, it is often necessary for 
+
 In process algebra, the decisions on how to proceed with the execution of an expression are usually made based on what the individual operands evaluate to {E:EXAMPLE}. These results can be available immediately, or we may need to wait for them {E:EXAMPLE}. In the latter case, we deal with a **suspended computation**.
 
 Whenever we have a suspended computation and need its result `x` to compute some expression `y`, we create a function `x => y` that is able to compute `y` from `x`, and then *map* the suspended computation of `x` to get a suspended computation of `y`.
