@@ -6,9 +6,13 @@ categories:
 ---
 # Expression rewriting engine for process algebra
 
-This is a progress report on my attempt to model a process algebra as an expression rewriting machine. The process algebra in question is [SubScript](http://subscript-lang.org/from-acp-and-scala-to-subscript/), {E}:PAPERS which is an extension to [ACP](https://en.wikipedia.org/wiki/Algebra_of_Communicating_Processes) (it is highly recommended to familiarize yourself with ACP and [process algebras](https://en.wikipedia.org/wiki/Process_calculus) before reading this article further).
+This is a progress report on my attempt to model a process algebra as an expression rewriting machine. The process algebra in question is [SubScript](http://subscript-lang.org/from-acp-and-scala-to-subscript/)[^1][^2], which is an extension to [ACP](https://en.wikipedia.org/wiki/Algebra_of_Communicating_Processes) (it is highly recommended to familiarize yourself with ACP and [process algebras](https://en.wikipedia.org/wiki/Process_calculus) before reading this article further).
+
+[^1]: [http://subscript-lang.org/papers/subscript-white-paper/](http://subscript-lang.org/papers/subscript-white-paper/)
+[^2]: [https://arxiv.org/abs/1504.03719](https://arxiv.org/abs/1504.03719)
 
 ## Process algebra expressions
+
 ### Theory
 A **process algebra (PA) expression** consists of atomic actions (AAs), special operands and operators. It describes some process with the help of these elements as follows.
 
@@ -46,7 +50,8 @@ Every process algebra entity, such as operator or atomic action, is represented 
 ### Example
 Let us have a look at how our GUI example above would have been executed in the standard implementation:
 
-1. A hierarchy of actors (nodes) is created: {E:PICTURE}
+1. A hierarchy of actors (nodes) is created: <img src="/media/expression-rewriting-engine-for-process-algebra/SubScriptActors.svg" alt="Diagram" width="650" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
+
 2. When the button `first` is pressed, it sends a message to its supervising actor, `*`, which in turn forwards it to `+`. Both these actors have the information that `first` have successfully finished at this point.
 3. `+` acts upon this information by cancelling its second operand
 4. `*` acts upon this information by instantiating an actor corresponding to its second operand and sending a message to it, ordering it to start execution
@@ -64,12 +69,12 @@ In the process of rewritings, the AAs are evaluated (executed) on need and hence
 Let us see how our GUI example behaves under the rewriting approach.
 
 First, we need to define the axioms we are working under:
-{E:AXIOMS}
 
-Next, under the choice axiom, we need to evaluate the first AAs of both processes, see which one has completed first and rewrite the expression to the corresponding operand of choice.
+<img src="/media/expression-rewriting-engine-for-process-algebra/axioms-1.gif" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
 
-{E:SPECIFY AXIOMS}
-If `button(first)` was completed first, the expression will be rewritten to `ε * gui {textField.text = "Hello World"}`. In turn, it will be rewritten to just `gui {textField.text = "Hello World"}`. To rewrite this AA, we need to evaluate it first. If everything goes well, it evaluates to `ε`, and the tree is rewritten to `ε`. This way, we computed the result of the original PA expression to be `ε`.
+Under (1) axiom, we need to evaluate the first AAs of both processes, see which one has completed first and rewrite the expression according to the axiom
+
+Assume `button(first)` was completed first. By `(1)`, the expression will be rewritten to `gui {textField.text = "Hello World"}`, which by `(3)` is equal to `gui {textField.text = "Hello World"} * ε`. By `(2)`, the `gui {/*...*/}` will be evaluated. Assuming it evaluated to `ε`, by `(2)` the expression will rewrite to `ε * ε`, which by `(3)` is just `ε`. This way, we computed the result of the original PA expression to be `ε`.
 
 ### Suspended computations
 Some AAs can take time to evaluate. For example, in case of `button(first)`, it takes time for a user to press the button. Hence, the result of such an AA is not readily available. However, it is often necessary to know it to proceed with the rewritings. This is a **suspended computation**.
@@ -81,14 +86,7 @@ Hence, there are two kinds of axioms: rewriting axioms and suspension axioms. Th
 
 For example, this is a set of axioms for the sequential composition of processes:
 
-\[\color{blue} {Rewriting\ axioms}\\
-[*]() = ε \\
-[*]([*](x) :: y) = [*](x :: y) \\
-[*](ε :: x) = x \\
-[*](δ :: x) = δ \\
-\color{blue} {Suspension\ axioms}\\
-\frac{[*](a :: x)}{a: r \rightarrow [*](r :: x) }\]
-<script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script>
+<img src="/media/expression-rewriting-engine-for-process-algebra/axioms-2.gif" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
 
 A sequence is presented as `[*](list)`, where `list` is a list of expressions, and `::` is concatenation.
 
@@ -110,6 +108,7 @@ Precisely, the algorithm is as follows:
 3. Otherwise, apply a rewrite axiom and recursively feed the result to this algorithm.
 
 ## Architecture
+
 ### Tree
 Process algebra expressions are modeled as ordinary [Tree](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L6)s. A `Tree` has a higher-kinded type argument to it, `S[_]`. `S` is a type a suspended computation's result gets boxed into (can be `Future[_]`, for example).
 

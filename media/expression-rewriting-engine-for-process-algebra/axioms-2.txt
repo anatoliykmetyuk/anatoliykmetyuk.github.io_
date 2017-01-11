@@ -1,0 +1,1 @@
+http://www.hostmath.com/Default.aspx?Code=(1)%3a%5cfrac%7bax+%2b+by%7d%7ba%3a+%CE%B5+%5crightarrow+x%3b+%CE%B4+%5crightarrow+by%5c%5cb%3a+%CE%B5+%5crightarrow+y%3b+%CE%B4+%5crightarrow+ax%7d%5c%5c%0d%0a%5c+%5c%5c%0d%0a(2)%3a%5cfrac%7bax%7d%7ba%3a+r+%5crightarrow+rx%7d%5c%5c%0d%0a%5c+%5c%5c%0d%0a(3)%3a%CE%B5x+%3d+x%CE%B5+%3d+x%5c%5c%0d%0a(4)%3a%CE%B4x+%3d+x%CE%B4+%3d+%CE%B4%5c%5c
