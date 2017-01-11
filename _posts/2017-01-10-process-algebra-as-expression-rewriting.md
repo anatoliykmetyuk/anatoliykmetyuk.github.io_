@@ -72,16 +72,12 @@ Next, under the choice axiom, we need to evaluate the first AAs of both processe
 If `button(first)` was completed first, the expression will be rewritten to `ε * gui {textField.text = "Hello World"}`. In turn, it will be rewritten to just `gui {textField.text = "Hello World"}`. To rewrite this AA, we need to evaluate it first. If everything goes well, it evaluates to `ε`, and the tree is rewritten to `ε`. This way, we computed the result of the original PA expression to be `ε`.
 
 ### Suspended computations
-Some AAs can take time to evaluate. For example, in case of `button(first)`, it takes time for a user to press the button. Hence, the result of such an AA is not readily available. However, it is often necessary for 
+Some AAs can take time to evaluate. For example, in case of `button(first)`, it takes time for a user to press the button. Hence, the result of such an AA is not readily available. However, it is often necessary to know it to proceed with the rewritings. This is a **suspended computation**.
 
-In process algebra, the decisions on how to proceed with the execution of an expression are usually made based on what the individual operands evaluate to {E:EXAMPLE}. These results can be available immediately, or we may need to wait for them {E:EXAMPLE}. In the latter case, we deal with a **suspended computation**.
-
-Whenever we have a suspended computation and need its result `x` to compute some expression `y`, we create a function `x => y` that is able to compute `y` from `x`, and then *map* the suspended computation of `x` to get a suspended computation of `y`.
-
-In the language of Category Theory, if we have `S[X]` and `X => Y`, and if `S` is a functor, we can map `X => Y` to `S[X] => S[Y]`.
+Functional programming offers a standard way of treatment for such a scenario: if the result of the computation is `A`, it is wrapped into a suspension type and becomes `S[A]`. If `S` is a functor, we can map `S[A]` and apply the rewriting rule within the map function as if we already know the result `A`. After the mapping, we get an `S[Tree]`, where `Tree` is an expression this one should be rewritten to once `A` is available.
 
 ### Axioms
-Hence, there are two kinds of axioms: the rewriting axioms and the suspension axioms. The latter are used in situations when we need to wait for some potentially long-running computation to finish to do the rewriting; the former are for situations when this is not the case.
+Hence, there are two kinds of axioms: rewriting axioms and suspension axioms. The latter are used in situations when we need to wait for some potentially long-running computation to finish to do the rewriting; the former are for situations when this is not the case.
 
 For example, this is a set of axioms for the sequential composition of processes:
 
@@ -91,29 +87,31 @@ For example, this is a set of axioms for the sequential composition of processes
 [*](ε :: x) = x \\
 [*](δ :: x) = δ \\
 \color{blue} {Suspension\ axioms}\\
-\frac{[*](a :: x)}{a: ε \rightarrow [*](x);\ δ \rightarrow δ}\]
+\frac{[*](a :: x)}{a: r \rightarrow [*](r :: x) }\]
 <script type="text/javascript" src="http://www.hostmath.com/Math/MathJax.js?config=OK"></script>
 
 A sequence is presented as `[*](list)`, where `list` is a list of expressions, and `::` is concatenation.
 
 The rewriting axioms are of the form `a = b`.
 
-The suspension axioms work on the trees for which there are some unknowns to compute. They have a horizontal bar, above which is the pattern with one or more unknown elements that need to be computed. Below the bar, there are instructions on how to map the result of the unknown element execution to the new tree which we will rewrite the current one with.
+The suspension axioms work on the trees for which there are some suspended computations to compute before it is possible to apply rewriting axioms. They have a horizontal bar, above which is the pattern with one or more unknown elements that need to be computed. Below the bar, there are instructions on how to map the result of the unknown element execution to the new tree which we will rewrite the current one with.
 
-It is possible to simplify expression like `εx` without any "heavy" execution, using a rewriting axiom: empty action `ε` followed by some process `x` is the same as `x`. However, for some atom `a`, we can not simplify `ax` without knowing the outcome of `a` - so a suspension axiom is used here.
+It is possible to simplify expression like `εx` without any "heavy" execution, using a rewriting axiom: empty action `ε` followed by some process `x` is the same as `x`. However, for some atom `a`, we can not simplify `ax` without knowing the outcome of `a`. So a suspension axiom is used here to compute the result `r` of `a`, and the rewriting rule is to substitute `r` in place of `a`.
+
+Speaking Category Theory, given `a: S[A]` and a tree `a * x` that needs rewriting and this particular suspension axiom can work on, the rewritten tree is `a.map { r => r * x }`, of type `S[Tree]`.
 
 ### Execution semantics
-A process algebra engine which works via expression rewriting takes an expression tree and a set of rewriting and suspension axioms as an input and follows the following algorithm:
+A process algebra engine which works via expression rewriting invokes the rewriting axioms on the input tree until a suspension axiom is available, in which case the suspension axiom will be invoked. This continues until the tree is simplified to ε - success result - or δ - failure.
 
-1. If a suspension axiom is applicable, apply it and wait for the resulting tree {E:HOW DO SUSPENSION AXIOMS WORK?}. Once the resulting tree is available, restart this algorithm recursively with this tree as an input.
+Precisely, the algorithm is as follows:
+
+1. If a suspension axiom is applicable, apply it and wait for the resulting tree. Once the resulting tree is available, restart this algorithm recursively with this tree as an input.
 2. Otherwise, if the input tree is a terminal element (either `ε` or `δ`), return it.
 3. Otherwise, apply a rewrite axiom and recursively feed the result to this algorithm.
 
-So, the rewriting axioms will be invoked on a tree until a suspension axiom is available, in which case it will be invoked. This continues until the tree is simplified to ε - successful result - or δ - failure.
-
-# Architecture
-## Tree
-Process algebra expressions are modeled as ordinary [Tree](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L6)s. A `Tree` has a higher-kinded type argument to it, `S[_]`. `S` is the type a suspended computation's result {E:SUSPENDED COMPUTATION?} gets boxed into (think of `Future[_]`).
+## Architecture
+### Tree
+Process algebra expressions are modeled as ordinary [Tree](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L6)s. A `Tree` has a higher-kinded type argument to it, `S[_]`. `S` is a type a suspended computation's result gets boxed into (can be `Future[_]`, for example).
 
 There are following notorious subclasses of `Tree`:
 
@@ -121,9 +119,11 @@ There are following notorious subclasses of `Tree`:
 - Terminal cases: [Result](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L88) and its subclasses: `Success` and `Failure`, representing ε and δ respectively.
 - [Suspend](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L83) - carries a suspended computation.
 
-A suspended computation is defined as `S[Tree[S]]` and should be interpreted as follows: there is some computation to run under `S` (however this `S` dictates to run it) and the result of it is another process algebra expression `Tree[S]`. For example, an ordinary atomic action can be represented as `S[Result[S]]` and should be read as follows: there's some action to run under `S`, and if it is successful (no exception happens), the result is `ε`, otherwise - δ.
+A suspended computation is carried by `Suspend` nodes as `S[Tree[S]]` and should be interpreted as follows: there is some computation to running under `S` and the result of this computation is another process algebra expression `Tree[S]`.
 
-## Execution
+For example, an ordinary atomic action can be represented as `S[Result[S]]` and should be read as follows: there's some action running under `S`, and if it is successful (no exception happens), the result is `ε`, otherwise - `δ`.
+
+### Axioms
 Sets of [rewriting](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L12) and [suspension](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L44) axioms are defined as partial functions and are straightforward to read.
 
 Some points to note about them:
@@ -131,41 +131,49 @@ Some points to note about them:
 - Rewriting axioms take a `Tree[S]` and return a `Tree[S]` as a result - they just rewrite a given tree.
 - Suspension axioms take a `Tree[S]` and return a `List[S[Tree[S]]]`. `List` reflects that there may be a need to make a choice between several trees (choice together with sequence is one of the fundamental operators of ACP). `S[Tree[S]]` means that the trees which the current one should be rewritten to are not readily available and are computed by `S`.
 
+### Execution
 These axioms are applied in a [loop](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L67) until a terminal case is reached, as described in the theory above.
 
-## Suspension type as a free object
+### Suspension type as a free object
 If one has a `Tree[S]`, they do not have much choice but to execute it under `S`. This may not always be desirable: for instance, one may have a Tree[[Eval](https://static.javadoc.io/org.typelevel/cats-core_2.12/0.8.1/cats/Eval$.html)], but want to execute it with multithreading via `Future`.
 
-For this reason, the function that runs the trees, [runM](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L65), can take a natural transformation, `S ~> G`, using which one can specify how to execute `S` under `G`.
+Another example is `gui(code)` AA from our example: we agreed that it runs the `code` under a GUI thread of a particular GUI framework we are working under - but what if we want our program to work under several GUI frameworks?
 
-Further increasing flexibility, we may even have a default implementation of `S` as a free object, in style of the [free monad](http://typelevel.org/cats/datatypes/freemonad.html).
+For this reason, the function that runs the trees, [runM](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L65), can take a natural transformation, `S ~> G`, using which one can specify how to map a suspended computation `S` to a suspended computation `G`.
 
-### `LanguageT` as a free S
-The pattern as follows. All the expressions for FreeACP are written with [LanguageT](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala) as `S` by default: `Tree[LanguageT]`.
+Further increasing flexibility, we may even have a default implementation of `S` as a [free object](https://en.wikipedia.org/wiki/Free_object), in style of the [free monad](http://typelevel.org/cats/datatypes/freemonad.html).
 
-`LanguageT` does not do anything by itself, but remembers the operations you tried to perform on it. It does this by [reifying](https://en.wikipedia.org/wiki/Reification_(computer_science)) all the operations done on it into case classes. For example, `t.map(f) == MapLanguage(t, f)`.
+#### `LanguageT` as a free S
+The pattern as follows. All the expressions for FreeACP are written with suspension type `S` equal to [LanguageT](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala) by default: `Tree[LanguageT]`.
+
+`LanguageT` is a free object - it does not do anything by itself, but remembers the operations you tried to perform on it. It does this by [reifying](https://en.wikipedia.org/wiki/Reification_(computer_science)) all the operations done on it into case classes. For example, `t.map(f) == MapLanguage(t, f)`.
 
 Next, the user can select whichever `S` they want to execute their program under, define a natural transformation `LanguageT ~> S` (roughly, `LanguageT[Tree[LanguageT]] => S[Tree[LanguageT]]`) and use it in the `runM` method to execute the `LanguageT` instances. This natural transformation is called the **compiler**, it compiles your program written under `LanguageT` to a concrete execution type `S`.
 
+In our example of a GUI thread, one may define a `case class Gui(code: () => Unit) extends LanguageT[Result[LanguageT]]` which contains the code to be executed, and then have a different natural transformation `LanguageT ~> S` for each GUI framework they are working under. This way, a program dependent on GUI thread can be written once and be executed on many GUI frameworks.
+
 ### Compilers for the `LanguageT`
 #### Default compiler
-There is a number of default subclasses of `LanguageT` that reify operations that are used in the suspension axioms (`map: (A => B) => (LanguageT[A] => LanguageT[B])` and `suspend: A => LanguageT[A])` and hence are necessary for the `LanguageT` to be used as a suspension type.
+There is a number of default subclasses of `LanguageT` that reify operations that are used in the suspension axioms (recall that the suspension axioms rely on `map: (A => B) => (LanguageT[A] => LanguageT[B])` and `suspend: A => LanguageT[A])` and hence are necessary for the `LanguageT` to be used as a suspension type.
 
-Hence, there is also a [default compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L38) for such subclasses (I will explain the `PartialCompiler[F]` type in a moment, but it is in essence a `LanguageT ~> F` natural transformation).
+Hence, there is also a [default compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L38) for such subclasses.
 
-Internally, the compiler is a partial function, specifying how to translate various subclasses of `LanguageT` to `F`. For example, `case MapLanguage(t1, f)   => F.map(mainCompiler(t1))(f)` is the line handling `MapLanguage`. All it does is mapping `t1` by `f` using a `F.map` where variable `F` is of type `Functor[F]`. In essence, the compiler describes how to *delegate* the `map` to the functor of `F`, whatever this `F` is.
+Internally, the compiler is a partial function, specifying how to translate various subclasses of `LanguageT` to `F`. For example, `case MapLanguage(t1, f)   => F.map(mainCompiler(t1))(f)` is the line handling `MapLanguage`, a reification of the `map` method called on `LanguageT`. All it does is mapping `t1` by `f` using a `F.map` where variable `F` is of type `Functor[F]`. In essence, the compiler describes how to *delegate* the `map` to the functor of `F`, whatever this `F` is.
 
-In its definition, the default compiler declares some implicit arguments: `implicit F: Functor[F], S: Suspended[F]`. This means that internally it delegates some operations to a `Functor` and a `Suspend` type classes, so if they are not in scope, there's nothing to delegate to and hence one can't get the compiler for `F`. This also works another way around: whatever your `F`, if you have a `Suspended` and a `Functor` for it, you will be able to compile your program under that `F`.
+In its definition, the default compiler declares some implicit arguments: `implicit F: Functor[F], S: Suspended[F]`. This means that internally it delegates some operations to a `Functor` and a `Suspend` type classes and hence depends on them. So if they are not in scope, there's nothing to delegate to and hence one can't instantiate the compiler for `F`. This also works another way around: whatever your `F`, if you have a `Suspended` and a `Functor` for it, you will be able to compile your program under that `F`.
 
-One can get the default compiler for `F` if and only if one has `Functor[F]` and `Suspended[F]`.
+*One can get the default compiler for `F` if and only if one has `Functor[F]` and `Suspended[F]`.*
 
 #### Compilers framework
 It is possible to compose compilers for different subclasses of `LanguageT`. One can define their own subclass `LanguageT` and add a compiler for that subclass, this way extending the expressive power they have.
 
 By default, one can only use an [atomic action](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L15) to create a suspended computation, but one can define more primitives to write process algebra expressions with.
 
-A simplest example is a [say](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L9) primitive that just prints something to the console. The pattern for `say` is as follows: first, we define a subclass of `LanguageT` - wherever we use it, we want it to mean "print the payload to the console". Next, we define a [compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L11) capable of executing that subclass under some `F`. This compiler has a very similar structure to the default compiler, except that it can only handle [one case](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L13) of the language: `SayContainer`.
+A simplest example is a [say](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L9) primitive that just prints something to the console. The pattern for `say` is as follows: first, we define a subclass of `LanguageT` - wherever we use it, we want it to mean "print the payload to the console". Next, we define a [compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L11) capable of executing that subclass under some `F`. This compiler has a very similar structure to the default one, except that it can only handle [one case](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/component/Say.scala#L13) of the language: `SayContainer`.
 
 Once defined, all the compilers can be composed to form a single compiler to be used in `runM`. This is done via the [compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L34) function. Since all the "small" compilers return an `Option[F[Tree[LanguageT]]]`, the "large" compiler iterates through the list of the "small" ones until a `Some(_)` is returned.
 
 Also, the "small" compilers, or [PartialCompiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L32)s are of type `Compiler[F] => LanguageT ~> OptionK[F, ?]` (and `Compiler[F]` is `LanguageT ~> F`). This means that we are able to use the "large" compiler from the "small" ones, so that we can invoke it recursively.
+
+## Conclusion
+FreeACP is still a work in progress. The theory and architecture are far from perfect and hopefully will endure substantial changes in future.
