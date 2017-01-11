@@ -152,6 +152,7 @@ Next, the user can select whichever `S` they want to execute their program under
 In our example of a GUI thread, one may define a `case class Gui(code: () => Unit) extends LanguageT[Result[LanguageT]]` which contains the code to be executed, and then have a different natural transformation `LanguageT ~> S` for each GUI framework they are working under. This way, a program dependent on GUI thread can be written once and be executed on many GUI frameworks.
 
 ### Compilers for the `LanguageT`
+
 #### Default compiler
 There is a number of default subclasses of `LanguageT` that reify operations that are used in the suspension axioms (recall that the suspension axioms rely on `map: (A => B) => (LanguageT[A] => LanguageT[B])` and `suspend: A => LanguageT[A])` and hence are necessary for the `LanguageT` to be used as a suspension type.
 
