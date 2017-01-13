@@ -8,8 +8,8 @@ This is the third part of my progress report on a rewriting-based implementation
 
 If you have not read the previous parts of this report, you are advised to do so before reading this one:
 
-- [Rewriting Process Algebra, Part 1: Introduction to Process Algebra](TODO)
-- [Rewriting Process Algebra, Part 2: Engine Theory](TODO)
+- [Rewriting Process Algebra, Part 1: Introduction to Process Algebra](/blog/2017/01/11/rewriting-process-algebra-part-1-introduction-to-process-algebra.html)
+- [Rewriting Process Algebra, Part 2: Engine Theory](/blog/2017/01/12/rewriting-process-algebra-part-2-engine-theory.html)
 
 
 # Tree
@@ -63,7 +63,7 @@ new (LanguageT ~> Future) {
       case SetText[TextField](textField, string) =>
         Future {
           Swing.onEDTWait { textField.text = string }
-          ε.asInstanceOf[A]  // Yes, yes, I know. This is a work in progress.
+          ε
         }
     }
 }

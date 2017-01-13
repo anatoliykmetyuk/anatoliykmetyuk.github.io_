@@ -4,10 +4,10 @@ title: Rewriting Process Algebra, Part 2&#58; Engine Theory
 categories:
 - blog
 ---
-This is a second part of a progress report on my attempt to model a process algebra as an expression rewriting machine. This part covers the theoretical foundations of the two implementations (engines) of SubScript: the [standard one](TODO), and [FreeACP](TODO), the one I am building. The other two parts:
+This is a second part of a progress report on my attempt to model a process algebra as an expression rewriting machine. This part covers the theoretical foundations of the two implementations (engines) of SubScript: the [standard one](https://github.com/scala-subscript/subscript), and [FreeACP](https://github.com/anatoliykmetyuk/free-acp), the one I am building. The other two parts:
 
-- [Rewriting Process Algebra, Part 1: Introduction to Process Algebra](TODO)
-- [Rewriting Process Algebra, Part 3: FreeACP Implementation](TODO)
+- [Rewriting Process Algebra, Part 1: Introduction to Process Algebra](/blog/2017/01/11/rewriting-process-algebra-part-1-introduction-to-process-algebra.html)
+- [Rewriting Process Algebra, Part 3: FreeACP Implementation](/blog/2017/01/13/rewriting-process-algebra-part-3-freeacp-implementation.html)
 
 # Standard SubScript implementation
 
@@ -22,7 +22,7 @@ These reported events include:
 - Some of the operands of an operator requested a break of this operator's execution (behaves roughly the same as a brake of a loop in Java).
 
 ## Example
-Let us have a look at how our GUI example from [Part 1](TODO) of this series would have been executed in the standard implementation:
+Let us have a look at how our GUI example from [Part 1](/blog/2017/01/11/rewriting-process-algebra-part-1-introduction-to-process-algebra.html) of this series would have been executed in the standard implementation:
 
 1. A hierarchy of actors (nodes) is created: <img src="/media/rewriting-process-algebra-part-2-engine-theory/SubScriptActors.svg" alt="Diagram" width="650" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
 
@@ -85,4 +85,4 @@ Precisely, the algorithm is as follows:
 3. Otherwise, apply a rewrite axiom and recursively feed the result to this algorithm.
 
 # Conclusion
-This part covered the theory and motivation for the rewriting-based implementation of SubScript, as well as the theory behind the standard implementation. In the [third part](TODO), we will dive into the code and survey the architectural highlights of the work done so far in this direction.
+This part covered the theory and motivation for the rewriting-based implementation of SubScript, as well as the theory behind the standard implementation. In the [third part](/blog/2017/01/13/rewriting-process-algebra-part-3-freeacp-implementation.html), we will dive into the code and survey the architectural highlights of the work done so far in this direction.

@@ -12,8 +12,8 @@ You can have a look at the work in progress at the [FreeACP](https://github.com/
 
 See also other parts of this report:
 
-- [Rewriting Process Algebra, Part 2: Engine Theory](TODO)
-- [Rewriting Process Algebra, Part 3: FreeACP Implementation](TODO)
+- [Rewriting Process Algebra, Part 2: Engine Theory](/blog/2017/01/12/rewriting-process-algebra-part-2-engine-theory.html)
+- [Rewriting Process Algebra, Part 3: FreeACP Implementation](/blog/2017/01/13/rewriting-process-algebra-part-3-freeacp-implementation.html)
 
 [^1]: [http://subscript-lang.org/papers/subscript-white-paper/](http://subscript-lang.org/papers/subscript-white-paper/)
 [^2]: [https://arxiv.org/abs/1504.03719](https://arxiv.org/abs/1504.03719)
@@ -98,4 +98,4 @@ eventSystem.register(secondButtonCallback)
 Note, however, that this code's primary objective is to demonstrate what program the PA expression above tries to describe. It is **not** meant to define semantics of the operators and AAs discussed above, nor is it meant to give an idea of how a PA engine might work. The engines discussed in subsequent chapters are **not** based on such an event system and callbacks.
 
 # Conclusion
-This part of the progress report covered the theory and motivation for the rewriting-based implementation of SubScript, as well as how the standard implementation works. In the [next part](/blog/2017/01/12/expression-rewriting-engine-for-process-algebra-implementation.html), we will dive into the code and survey the architectural highlights of the work done so far in this direction.
+This part of the progress report covered the theory and motivation for the rewriting-based implementation of SubScript, as well as how the standard implementation works. In the [next part](/blog/2017/01/13/rewriting-process-algebra-part-3-freeacp-implementation.html), we will dive into the code and survey the architectural highlights of the work done so far in this direction.
