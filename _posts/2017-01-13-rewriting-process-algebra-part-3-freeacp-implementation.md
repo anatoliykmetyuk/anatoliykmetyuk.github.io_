@@ -1,14 +1,18 @@
 ---
 layout: post
-title: Expression rewriting engine for process algebra - implementation
+title: Rewriting Process Algebra, Part 3&#58; FreeACP Implementation
 categories:
 - blog
 ---
-# Expression rewriting engine for process algebra - implementation
+# Rewriting Process Algebra, Part 3: FreeACP Implementation
 
-This is the second part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). For the first part, see [Expression rewriting engine for process algebra - theory](/blog/2017/01/11/expression-rewriting-engine-for-process-algebra-theory.html).
+This is the third part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). This part covers the architecture of FreeACP I came up so far with while implementing the rewriting engine for SubScript.
 
-This part covers the architecture I came up so far while implementing the rewriting engine for SubScript.
+If you have not read the previous parts of this report, you are advised to do so before reading this one:
+
+- [Rewriting Process Algebra, Part 1: Introduction to Process Algebra](TODO)
+- [Rewriting Process Algebra, Part 2: Engine Theory](TODO)
+
 
 ## Tree
 Process algebra expressions are modeled as ordinary [Tree](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L6)s. A `Tree` has a higher-kinded type argument to it, `S[_]`. `S` is the boxed type of a suspended computation's result for example `Future[_]`.
@@ -37,7 +41,7 @@ These axioms are applied in a [loop](https://github.com/anatoliykmetyuk/free-acp
 ## Suspension type as a free object
 If one has a `Tree[S]`, they do not have much choice but to execute it under `S`. This may not always be desirable: For instance, one may have a `Tree[`[Eval](https://static.javadoc.io/org.typelevel/cats-core_2.12/0.8.1/cats/Eval$.html)`]`, but want to execute it in parallel via `Future`.
 
-Another example is the `gui(code)` AA from our example: We agreed that it runs the `code` under a GUI thread of a particular GUI framework we are working under. But what if we want our program to work under several GUI frameworks?
+Alternatively, `S` may stay constant, but the way of execution under `S` may not. A good example of this is the `setText(textField, string)` AA from our example: We agreed that it sets the text of `textField` to `string` under a particular GUI framework we are working under. But what if we want our program to work under several GUI frameworks? Each of them will have its own implementation of `textField` and the way to set its text will differ between the frameworks.
 
 For this reason, the function that runs the trees, [runM](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L65), can take a natural transformation, `S ~> G`, using which one can specify how to map a suspended computation `S` to a suspended computation `G`.
 
@@ -50,7 +54,24 @@ The pattern is as follows: All the expressions for FreeACP are written with susp
 
 Next, the user can select whichever `S` they want to execute their program under, define a natural transformation `LanguageT ~> S` (roughly, `LanguageT[Tree[LanguageT]] => S[Tree[LanguageT]]`) and use it in the `runM` method to execute the `LanguageT` instances. This natural transformation is called the **compiler**, it compiles your program written under `LanguageT` to a concrete execution type `S`.
 
-In our example of a GUI thread, one may define a `case class Gui(code: () => Unit) extends LanguageT[Result[LanguageT]]` which contains the code to be executed, and then have a different natural transformation `LanguageT ~> S` for each GUI framework they are working under. This way, a program dependent on GUI thread can be written once and be executed on many GUI frameworks.
+In our example of the `setText` AA, one may define a `case class SetText[TF](textField: TF, string: String) extends LanguageT[Result[LanguageT]]` which contains all the data necessary to set the text of the text field. Then, one can define a different natural transformation `LanguageT ~> S` for each GUI framework they are working under. This way, a program dependent on GUI thread can be written once and be executed on many GUI frameworks.
+
+For example, such a natural transformation under Swing may look like:
+
+{% highlight scala %}
+new (LanguageT ~> Future) {
+  override def apply[A](t: LanguageT[A]): Future[A] =
+    t match {
+      case SetText[TextField](textField, string) =>
+        Future {
+          Swing.onEDTWait { textField.text = string }
+          ε.asInstanceOf[A]  // Yes, yes, I know. This is a work in progress.
+        }
+    }
+}
+{% endhighlight %}
+
+The point to notice here is that all the GUI-specific things are encapsulated in this compiler, and hence one program can be executed under many GUI frameworks, provided one has proper compilers for these frameworks.
 
 ### Compilers for `LanguageT`
 
