@@ -4,8 +4,6 @@ title: Rewriting Process Algebra, Part 3&#58; FreeACP Implementation
 categories:
 - blog
 ---
-# Rewriting Process Algebra, Part 3: FreeACP Implementation
-
 This is the third part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). This part covers the architecture of FreeACP I came up so far with while implementing the rewriting engine for SubScript.
 
 If you have not read the previous parts of this report, you are advised to do so before reading this one:
@@ -14,7 +12,7 @@ If you have not read the previous parts of this report, you are advised to do so
 - [Rewriting Process Algebra, Part 2: Engine Theory](TODO)
 
 
-## Tree
+# Tree
 Process algebra expressions are modeled as ordinary [Tree](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L6)s. A `Tree` has a higher-kinded type argument to it, `S[_]`. `S` is the boxed type of a suspended computation's result for example `Future[_]`.
 
 There are the following notorious subclasses of `Tree`:
@@ -27,7 +25,7 @@ A suspended computation is carried by `Suspend` nodes as `S[Tree[S]]` and should
 
 For example, an ordinary atomic action can be represented as `S[Result[S]]` and should be read as follows: There is some action running under `S`, and if it is successful (no exception happens), the result is `ε`, otherwise `δ`.
 
-## Axioms
+# Axioms
 Sets of [rewriting](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L12) and [suspension](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L44) axioms are defined as partial functions and are straightforward to read.
 
 Some points to note about them:
@@ -35,10 +33,10 @@ Some points to note about them:
 - Rewriting axioms take a `Tree[S]` and return a `Tree[S]` as a result - they just rewrite a given tree.
 - Suspension axioms take a `Tree[S]` and return a `List[S[Tree[S]]]`. `List` reflects that there may be a need to make a choice between several trees (choice together with sequence is one of the fundamental operators of ACP). `S[Tree[S]]` means that the trees which the current one should be rewritten to are not readily available and are computed by `S`.
 
-## Execution
+# Execution
 These axioms are applied in a [loop](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Tree.scala#L67) until a terminal case is reached, as described in the theory above.
 
-## Suspension type as a free object
+# Suspension type as a free object
 If one has a `Tree[S]`, they do not have much choice but to execute it under `S`. This may not always be desirable: For instance, one may have a `Tree[`[Eval](https://static.javadoc.io/org.typelevel/cats-core_2.12/0.8.1/cats/Eval$.html)`]`, but want to execute it in parallel via `Future`.
 
 Alternatively, `S` may stay constant, but the way of execution under `S` may not. A good example of this is the `setText(textField, string)` AA from our example: We agreed that it sets the text of `textField` to `string` under a particular GUI framework we are working under. But what if we want our program to work under several GUI frameworks? Each of them will have its own implementation of `textField` and the way to set its text will differ between the frameworks.
@@ -47,7 +45,7 @@ For this reason, the function that runs the trees, [runM](https://github.com/ana
 
 Further increasing flexibility, we may even have a default implementation of `S` as a [free object](https://en.wikipedia.org/wiki/Free_object), in style of the [free monad](http://typelevel.org/cats/datatypes/freemonad.html).
 
-### `LanguageT` as a free S
+## `LanguageT` as a free `S`
 The pattern is as follows: All the expressions for FreeACP are written with suspension type `S` equal to [LanguageT](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala) by default, `Tree[LanguageT]`.
 
 `LanguageT` is a free object - it does not do anything by itself, but remembers the operations you tried to perform on it. It does this by [reifying](https://en.wikipedia.org/wiki/Reification_(computer_science)) all the operations done on it into case classes. For example, `t.map(f) == MapLanguage(t, f)`.
@@ -73,9 +71,9 @@ new (LanguageT ~> Future) {
 
 The point to notice here is that all the GUI-specific things are encapsulated in this compiler, and hence one program can be executed under many GUI frameworks, provided one has proper compilers for these frameworks.
 
-### Compilers for `LanguageT`
+## Compilers for `LanguageT`
 
-#### Default compiler
+### Default compiler
 There is a number of default subclasses of `LanguageT` that reify operations that are used in the suspension axioms (recall that the suspension axioms rely on `map: (A => B) => (LanguageT[A] => LanguageT[B])` and `suspend: A => LanguageT[A])` and hence are necessary for the `LanguageT` to be used as a suspension type.
 
 Hence, there is also a [default compiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L38) for such subclasses.
@@ -86,7 +84,7 @@ In its definition, the default compiler declares some implicit arguments: `impli
 
 *One can get the default compiler for `F` if and only if one has `Functor[F]` and `Suspended[F]`.*
 
-#### Compilers framework
+### Compilers framework
 It is possible to compose compilers for different subclasses of `LanguageT`. One can define their own subclass `LanguageT` and add a compiler for that subclass, this way extending the expressive power they have.
 
 By default, one can only use an [atomic action](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L15) to create a suspended computation, but one can define more primitives to write process algebra expressions with.
@@ -97,5 +95,5 @@ Once defined, all the compilers can be composed to form a single compiler to be 
 
 Also, the "small" compilers, or [PartialCompiler](https://github.com/anatoliykmetyuk/free-acp/blob/0932ccde36b0efa83dd01b25ca1fee393154d987/core/src/main/scala/freeacp/Language.scala#L32)s are of type `Compiler[F] => LanguageT ~> OptionK[F, ?]` (and `Compiler[F]` is `LanguageT ~> F`). This means that we are able to use the "large" compiler from the "small" ones, so that we can invoke it recursively.
 
-## Conclusion
+# Conclusion
 FreeACP is still a work in progress. The theory and architecture are far from perfect and hopefully will endure substantial changes in future.
