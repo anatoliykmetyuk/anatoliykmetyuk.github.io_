@@ -40,7 +40,7 @@ button(first)  * gui { textField.text = "Hello World"    } +
 button(second) * gui { textField.text = "Something Else" }
 {% endhighlight %}
 
-Let `button(btn)` be an atomic action that happens when the button `btn` is pressed. The action `button(btn)` performs is a wait upon `btn`. When `btn` is pressed, the action finishes successfuly. Let `gui(code)` specify an AA that executes `code` on the UI thread of the GUI framework in question, and `textField.text = "foo"` is used to set the text of some GUI element, making it visible to the user.
+Let `button(btn)` be an atomic action that happens when the button `btn` is pressed. The action `button(btn)` performs is a wait upon `btn`. When `btn` is pressed, the action finishes successfully. Let `gui(code)` specify an AA that executes `code` on the UI thread of the GUI framework in question, and `textField.text = "foo"` is used to set the text of some GUI element, making it visible to the user.
 
 `*` is a sequential operator, specifying that its operands should execute one after another.
 
@@ -51,6 +51,25 @@ Hence, in the example above, if the button `first` is pressed, the following wil
 1. `button(first)` will evaluate to `ε`.
 2. Since one of its operands has started, `+` will discard the `button(second) * gui { textField.text = "Something Else" }` - now, even if the user presses the `second` button, `gui { textField.text = "Something Else" }` has no chance of being executed.
 3. According to `*` in `button(first) * gui { textField.text = "Hello World" }`, its second operand must be executed after the successful execution of the first one. Since this has happened, `gui { textField.text = "Hello World" }` will be executed, setting `testField.text` to "Hello World".
+
+#### Intuition
+You can check your intuition regarding the semantics of the example above by having a look at how the same behavior can be expressed in plain Scala.
+
+In the code below, consider `eventSystem` to be some object you can register and deregister callbacks of the form `Event => Unit` with. It is guaranteed that these callbacks will be called on a button click - a typical scenario in a Scala GUI application.
+
+Then, the above example would be expressed as follows:
+
+{% highlight scala %}
+def callback(e: Event): Unit = {
+  if      (e.button == first ) { textField.text = "Hello World"    }
+  else if (e.button == second) { textField.text = "Something Else" }
+  eventSystem.deregister(callback)
+}
+eventSystem.register(callback)
+{% endhighlight %}
+
+Note, however, that this example should **not** be considered a reactive implementation of the algebra itself. It only illustrates how to express the behavior of the PA expression above to the terms of an event system and callbacks.
+
 
 ## Standard SubScript implementation
 
