@@ -34,15 +34,11 @@ button(first)  * gui { textField.text = "Hello World"    } +
 button(second) * gui { textField.text = "Something Else" }
 {% endhighlight %}
 
-Let `button(btn)` be an atomic action that happens when the button `btn` is pressed. Let `gui(code)` specify an AA that executes `code` on the UI thread of the GUI framework in question, and `textField.text = "foo"` is used to set the text of some GUI element, making it visible to the user.
-
-TODO What action does `button(btn)` perform?
+Let `button(btn)` be an atomic action that happens when the button `btn` is pressed. The action `button(btn)` performs is a wait upon `btn`. When `btn` is pressed, the action finishes successfuly. Let `gui(code)` specify an AA that executes `code` on the UI thread of the GUI framework in question, and `textField.text = "foo"` is used to set the text of some GUI element, making it visible to the user.
 
 `*` is a sequential operator, specifying that its operands should execute one after another.
 
-`+` is a choice operator, its precedence is lower than that of `*`. Given two arbitrary PA expressions as its operands, the first one to start (have an AA successfully evaluate to ε in it) will be chosen for full execution and the other one will be discarded.
-
-TODO `+` is not very clear to me. My intuitive understanding is that of regular expressions. By analogy, try to execute the left operand first. If it fails, execute the second. 
+`+` is a choice operator, its precedence is lower than that of `*`. A choice is one of the fundamental operators of the ACP, along with `*`. It selects one of its operands to execute and discards the others. The mechanism of such a choice is not specified and depends on implementation. For the sake of this example, assume that the implementation is as follows: Given two arbitrary PA expressions as its operands, the first one to start (have an AA successfully evaluate to ε in it) will be chosen for full execution and the other one will be discarded.
 
 Hence, in the example above, if the button `first` is pressed, the following will happen:
 
@@ -58,7 +54,11 @@ The standard [implementation](https://github.com/scala-subscript/subscript) of S
 
 Every process algebra entity, such as operator or atomic action, is represented by its own node (actor) in an execution graph (actor hierarchy). Operators become actors that supervise other actors - operands of these operators. The lower-level actors report all the events that pertain to them to their supervisors. Based on the events, the supervisors coordinate the execution of their subordinates.
 
-TODO What are events?
+These reported events include:
+
+- An atomic action being successfully completed in one of the operator's subordinates.
+- An operator itself has completed successfully, according to the definition of the particular operator.
+- Some of the operands of an operator requested a break of this operator's execution (behaves roughly the same as a brake of a loop in Java).
 
 #### Example
 Let us have a look at how our GUI example above would have been executed in the standard implementation:
