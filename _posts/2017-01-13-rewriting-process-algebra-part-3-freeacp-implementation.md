@@ -3,6 +3,8 @@ layout: post
 title: Rewriting Process Algebra, Part 3&#58; FreeACP Implementation
 categories:
 - blog
+description: A rewriting-based process algebra implementation in Scala.
+keywords: [process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming]
 ---
 This is the third part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). This part covers the architecture of FreeACP I came up with so far while implementing the rewriting engine for SubScript.
 
