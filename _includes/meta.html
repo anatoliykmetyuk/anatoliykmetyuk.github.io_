@@ -1,0 +1,16 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ site.data.theme.name }} - {{ page.title }}</title>
+<meta name="author" content="{{ site.data.theme.name }}" />
+
+{% if page.description %}
+<meta name="description" content="{{ page.description | escape }}">
+{% else %}
+<meta name="description" content="The blog of {{ site.data.theme.name }}">
+{% endif %}
+
+{% if page.keywords %}
+<meta name="keywords" content="{{ page.keywords | join: ', ' | escape }}"/>
+{% else %}
+<meta name="keywords" content="scala, programming, functional programming">
+{% endif %}
