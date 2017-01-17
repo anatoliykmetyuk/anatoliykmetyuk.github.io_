@@ -49,7 +49,7 @@ First, we need to define the axioms we are working under (note that the axioms b
 
 <img src="/media/rewriting-process-algebra-part-2-engine-theory/axioms-1.gif" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
 
-The axioms with the horizontal bar are further discussed in the "Axioms" section. Roughly, they dictate to evaluate the AAs below the bar, and, depending on the result of this evaluation, rewrite the expression as described by the right hand side expression of the arrow.
+The axioms with the horizontal bar are further discussed in the "Axioms" section. Roughly, they dictate how to evaluate the expressions above the bar, and, depending on the result of this evaluation, rewrite the expression as described by the right-hand side expression of the arrow.
 
 For example, `(1)` should be interpreted as follows. Given an expression of the form `ax + by`, where `a` and `b` are AAs, it is possible to rewrite it by evaluating `a` and `b`. Whichever finishes its evaluation first, determines how to rewrite the expression above the bar. If `a` evaluates first and it evaluates to `ε`, the expression above the bar should be rewritten to `x`; if `a` evaluates to `δ`, the expression above the bar should be rewritten to `by`. The rules for `b` are similar.
 
@@ -67,7 +67,7 @@ Assume `button(first)` has completed first. By `(1)`, the expression will be rew
 ## Suspended computations
 Some AAs can take time to evaluate. For example, in case of `button(first)`, a reasonable implementation of this AA will wait until the user has pressed `first` and will be considered successful (evaluates to `ε`) when this wait is completed. But it takes time for a user to press the button. Hence, the evaluation of such an AA can also take time. However, it is often necessary to know the result of such an evaluation to proceed with the rewritings. If the evaluation of AA is not immediate, we shall call it a **suspended computation**.
 
-Functional Programming offers a standard way of treatment for such a scenario: If the result of the computation is of type `A`, it is wrapped into a suspension type and becomes `S[A]`. If `S` is a functor, we can map `S[A]` and apply the rewriting rule within the map function as if we already knew the result `A`. After the mapping, we get an `S[Tree]`, where `Tree` is an expression this one should be rewritten to once `A` is available.
+Functional Programming offers a standard way of treatment for such a scenario: If the result of the computation is of type `A`, it is wrapped into a suspension type and becomes `S[A]`. If `S` is a functor, we can map `S[A]` and apply the rewriting rule within the map function as if we already knew the result `A`. After the mapping, we get `S[B]`, where `B` is an expression this one should be rewritten to once `A` is available.
 
 ## Axioms
 Hence, there are two kinds of axioms: rewriting axioms and suspension axioms. The latter are used in situations when we need to wait for some potentially long-running computation to finish to do the rewriting; the former are for situations when this is not the case.
