@@ -3,6 +3,8 @@ layout: post
 title: Dissecting Shapeless&#58; Poly
 categories:
 - blog
+description: An overview of the architecture of Shapeless' Polymorphic functions (Poly).
+keywords: [scala,shapeless,functional programming,category theory,polymorphic function,poly,software architecture]
 ---
 In this article, I would like to analyse the architecture of Shapeless' polymorphic functions and their inner workings.
 
