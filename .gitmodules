@@ -1,0 +1,3 @@
+[submodule "plugins/pandocfilters"]
+	path = plugins/pandocfilters
+	url = https://github.com/anatoliykmetyuk/pandocfilters.git

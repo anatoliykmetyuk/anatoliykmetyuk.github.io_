@@ -1,0 +1,1 @@
+This is the sources for my [blog](http://akmetiuk.com). The credit for the template used goes to [swanson/lagom](https://github.com/swanson/lagom/). It was further adapted, so that it works with [Hakyll](https://jaspervdj.be/hakyll/) now.
