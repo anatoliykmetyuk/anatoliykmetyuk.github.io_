@@ -10,5 +10,7 @@ executable site
                   , yaml   == 0.8.*
                   , text   == 1.2.*
                   , pandoc == 1.19.*
+                  , skylighting >= 0.1
+                  , containers  == 0.5.7.1
   ghc-options:      -threaded
   default-language: Haskell2010

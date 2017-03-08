@@ -9,8 +9,14 @@ import           Hakyll
 import qualified Data.Yaml                     as Yaml
 import qualified Data.Text                     as T
 import qualified Data.Text.Encoding            as T
+import qualified Data.Set                      as S
 import           Hakyll.Core.Metadata
 import           Text.Pandoc
+import           Skylighting.Styles
+import           Skylighting.Format.HTML
+
+import           Debug.Trace
+
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -18,11 +24,9 @@ main = hakyll $ do
   create ["index.html"] $ do
     route idRoute
     compile $ do
-      rawDataIds <- getMatches "data/*.yml"
-    
+
       let posts :: Compiler [Item String]
           posts = recentFirst =<< loadAll "posts/*"
-          dataCtx = mconcat $ fmap ymlContext rawDataIds
           indexCtx =
             listField "posts" postCtx posts <>
             constField "title" "Blog Posts" <>
@@ -36,7 +40,7 @@ main = hakyll $ do
   match "posts/*" $ do
     route $ setExtension "html"
     compile $
-          (pandocCompilerWithTransformM defaultHakyllReaderOptions defaultHakyllWriterOptions $
+          (pandocCompilerWithTransformM readerOpts writerOpts $
             graphvizFilter >=> plantumlFilter)
 
       >>= loadAndApplyTemplate "templates/post.html"    postCtx
@@ -46,8 +50,13 @@ main = hakyll $ do
   create ["assets/all.css"] $ do
     route idRoute
     compile $ do
-      frags <- loadAll "private-assets/css/*.css" :: Compiler [Item String]
-      makeItem $ concatMap itemBody frags
+      frags     <- loadAll "private-assets/css/*.css" >>= (return . fmap itemBody)
+      let frags' = frags ++ [styleToCss highlightStyle]
+      makeItem $ compressCss $ concat frags'
+
+  match "assets/imgs/**" $ do
+    route idRoute
+    compile copyFileCompiler
 
   ["templates/*", "fragments/*"] `forM_` \f -> match f $ compile templateCompiler
   match "private-assets/css/*.css" $ compile getResourceBody
@@ -61,8 +70,19 @@ main = hakyll $ do
 --------------------------------------------------------------------------------
 postCtx :: Context String
 postCtx =
-  dateField "date" "%B %e, %Y" `mappend`
-  defaultContext
+  dateField "date" "%B %e, %Y" <>
+  defaultContext <>
+  dataCtx
+
+dataCtx :: Context String
+dataCtx = flattenCtx $ do
+  rawDataIds <- getMatches "data/*.yml" :: Compiler [Identifier]
+  return $ mconcat $ fmap ymlContext rawDataIds
+
+flattenCtx :: Compiler (Context a) -> Context a
+flattenCtx cmp = Context $ \k x is -> do
+  ctx <- cmp
+  (unContext ctx) k x is 
 
 
 --------------------------------------------------------------------------------
@@ -86,7 +106,7 @@ type Script = String
 
 scriptFilter :: Script -> Pandoc -> Compiler Pandoc
 scriptFilter scr pdc =
-  scriptFilterWith scr defaultHakyllReaderOptions defaultHakyllWriterOptions pdc
+  scriptFilterWith scr readerOpts writerOpts pdc
 
 scriptFilterWith :: Script
                  -> ReaderOptions
@@ -106,3 +126,16 @@ pyPandocPlugin str = scriptFilter $ "./plugins/pandocfilters/examples/" ++ str +
 
 graphvizFilter = pyPandocPlugin "graphviz"
 plantumlFilter = pyPandocPlugin "plantuml"
+
+
+--------------------------------------------------------------------------------
+highlightStyle = pygments
+
+writerOpts = defaultHakyllWriterOptions {
+  writerHighlightStyle = highlightStyle
+, writerHTMLMathMethod = WebTeX "https://latex.codecogs.com/png.latex?"
+}
+readerOpts = defaultHakyllReaderOptions {
+  readerStandalone = True
+, readerExtensions = S.fromList [Ext_tex_math_dollars]
+}
