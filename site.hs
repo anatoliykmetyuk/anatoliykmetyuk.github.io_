@@ -44,6 +44,7 @@ main = hakyll $ do
           (pandocCompilerWithTransformM readerOpts writerOpts $
             codeInclude >=> graphvizFilter >=> plantumlFilter)
 
+      >>= saveSnapshot "content"
       >>= loadAndApplyTemplate "templates/post.html"    postCtx
       >>= loadAndApplyTemplate "templates/default.html" postCtx
       >>= relativizeUrls
@@ -69,6 +70,13 @@ main = hakyll $ do
   match "data/*.yml" $ compile getResourceBody
   
   createRedirects brokenLinks
+
+  create ["atom.xml"] $ do
+    route idRoute
+    compile $ do
+      let feedCtx = postCtx `mappend` bodyField "description"
+      posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots "posts/*" "content"
+      renderAtom feedConfig feedCtx posts
 
 
 --------------------------------------------------------------------------------
@@ -145,6 +153,13 @@ writerOpts = defaultHakyllWriterOptions {
 }
 readerOpts = defaultHakyllReaderOptions
 
+feedConfig = FeedConfiguration {
+  feedTitle       = "Blog of Anatolii Kmetiuk"
+, feedDescription = "All things functional"
+, feedAuthorName  = "Anatolii Kmetiuk"
+, feedAuthorEmail = "anatoliykmetyuk@gmail.com"
+, feedRoot        = "http://akmetiuk.com"
+}
 
 --------------------------------------------------------------------------------
 brokenLinks :: [(Identifier, String)]
