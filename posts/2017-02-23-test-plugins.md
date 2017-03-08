@@ -1,10 +1,8 @@
 ---
 layout: post
 title: Test Plugins
-categories:
-- blog
 description: Dummy test page
-keywords: [test]
+keywords: test
 ---
 This is the third part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). This part covers the architecture of FreeACP I came up with so far while implementing the rewriting engine for SubScript.
 

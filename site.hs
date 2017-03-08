@@ -30,6 +30,7 @@ main = hakyll $ do
           indexCtx =
             listField "posts" postCtx posts <>
             constField "title" "Blog Posts" <>
+            boolField  "website" (\_ -> True) <>
             dataCtx <>
             defaultContext
 
@@ -137,5 +138,4 @@ writerOpts = defaultHakyllWriterOptions {
 }
 readerOpts = defaultHakyllReaderOptions {
   readerStandalone = True
-, readerExtensions = S.fromList [Ext_tex_math_dollars]
 }
