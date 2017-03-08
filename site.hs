@@ -67,6 +67,9 @@ main = hakyll $ do
     compile copyFileCompiler
 
   match "data/*.yml" $ compile getResourceBody
+  
+  createRedirects brokenLinks
+
 
 --------------------------------------------------------------------------------
 postCtx :: Context String
@@ -139,3 +142,17 @@ writerOpts = defaultHakyllWriterOptions {
 readerOpts = defaultHakyllReaderOptions {
   readerStandalone = True
 }
+
+
+--------------------------------------------------------------------------------
+brokenLinks :: [(Identifier, String)]
+brokenLinks = [
+  ("blog/2017/01/13/rewriting-process-algebra-part-3-freeacp-implementation.html", "/posts/2017-01-13-rewriting-process-algebra-part-3-freeacp-implementation.html"),
+  ("blog/2017/01/12/rewriting-process-algebra-part-2-engine-theory.html", "/posts/2017-01-12-rewriting-process-algebra-part-2-engine-theory.html"),
+  ("blog/2017/01/11/rewriting-process-algebra-part-1-introduction-to-process-algebra.html", "/posts/2017-01-11-rewriting-process-algebra-part-1-introduction-to-process-algebra.html"),
+  ("blog/2016/10/09/dissecting-shapeless-poly.html", "/posts/2016-10-09-dissecting-shapeless-poly.html"),
+  ("blog/2016/09/30/dissecting-shapeless-hlists.html", "/posts/2016-09-30-dissecting-shapeless-hlists.html"),
+  ("blog/2016/08/10/splitting-monolitic-commits.html", "/posts/2016-08-10-splitting-monolitic-commits.html"),
+  ("blog/2016/04/13/subscript-values-in-by-name-calls.html", "/posts/2016-04-13-subscript-values-in-by-name-calls.html"),
+  ("blog/2016/04/08/subscript-progress-report.html", "/posts/2016-04-08-subscript-progress-report.html"),
+  ("blog/2016/03/29/compiling-caffe.html", "/posts/2016-03-29-compiling-caffe.html")]
