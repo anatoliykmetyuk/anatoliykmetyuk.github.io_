@@ -42,7 +42,7 @@ main = hakyll $ do
     route $ setExtension "html"
     compile $
           (pandocCompilerWithTransformM readerOpts writerOpts $
-            graphvizFilter >=> plantumlFilter)
+            codeInclude >=> graphvizFilter >=> plantumlFilter)
 
       >>= loadAndApplyTemplate "templates/post.html"    postCtx
       >>= loadAndApplyTemplate "templates/default.html" postCtx
@@ -120,7 +120,8 @@ scriptFilterWith :: Script
 scriptFilterWith scr readerOpts writerOpts pdc = do
   let inJson = writeJSON writerOpts pdc
   outJson   <- unixFilter scr [] inJson
-  return $ either (error . show) id $ readJSON readerOpts outJson
+  let res    = either (error . show) id $ readJSON readerOpts outJson
+  return $ res --trace (show res) res
 
 
 --------------------------------------------------------------------------------
@@ -130,6 +131,7 @@ pyPandocPlugin str = scriptFilter $ "./plugins/pandocfilters/examples/" ++ str +
 
 graphvizFilter = pyPandocPlugin "graphviz"
 plantumlFilter = pyPandocPlugin "plantuml"
+codeInclude    = scriptFilter   "./plugins/pandoc-include-code/dist/build/pandoc-include-code/pandoc-include-code"
 
 
 --------------------------------------------------------------------------------

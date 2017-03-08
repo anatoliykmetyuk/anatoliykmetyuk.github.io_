@@ -12,7 +12,7 @@ The most interesting part of the engine is the resumption:
 
 $\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
 
-```{.scala include=../code/matryoshka-intro/src/main/scala/matryoshkaintro/Main.scala snippet=cool-thingy}
+```{.scala include=./code/matryoshka-intro/src/main/scala/matryoshkaintro/Main.scala snippet=cool-thingy}
 ```
 
 ```scala
