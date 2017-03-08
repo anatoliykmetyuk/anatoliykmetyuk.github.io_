@@ -138,12 +138,12 @@ codeInclude    = scriptFilter   "./plugins/pandoc-include-code/dist/build/pandoc
 highlightStyle = pygments
 
 writerOpts = defaultHakyllWriterOptions {
-  writerHighlightStyle = highlightStyle
-, writerHTMLMathMethod = WebTeX "https://latex.codecogs.com/png.latex?"
+  writerHighlightStyle  = highlightStyle
+, writerHTMLMathMethod  = WebTeX "https://latex.codecogs.com/png.latex?"
+, writerTableOfContents = True
+, writerTemplate        = Just "$toc$\n$body$"
 }
-readerOpts = defaultHakyllReaderOptions {
-  readerStandalone = True
-}
+readerOpts = defaultHakyllReaderOptions
 
 
 --------------------------------------------------------------------------------
