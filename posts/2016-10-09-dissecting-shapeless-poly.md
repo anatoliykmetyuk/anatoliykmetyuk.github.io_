@@ -4,7 +4,7 @@ title: Dissecting Shapeless&#58; Poly
 categories:
 - blog
 description: An overview of the architecture of Shapeless' Polymorphic functions (Poly).
-keywords: [scala,shapeless,functional programming,category theory,polymorphic function,poly,software architecture]
+keywords: scala,shapeless,functional programming,category theory,polymorphic function,poly,software architecture
 ---
 In this article, I would like to analyse the architecture of Shapeless' polymorphic functions and their inner workings.
 
@@ -20,33 +20,8 @@ The article describes the architecture of Shapeless 2.3.2, which is the latest v
 # Core principles
 To better see the core ideas behind Shapeless' `Poly`s, let us try to implement them *ad hoc*, without any imports from Shapeless.
 
-{%highlight scala%}
-object AdHocPoly extends App {
-  trait Case[F, In] {
-    type Out
-    def apply(x: In): Out
-  }
-
-  trait Poly {
-    def apply[T](x: T)(implicit cse: Case[this.type, T]): cse.Out = cse(x)
-  }
-
-  object f extends Poly {
-    implicit val intCase = new Case[f.type, Int] {
-      type Out = String
-      def apply(x: Int) = "It works! " * x
-    }
-
-    implicit val stringCase = new Case[f.type, String] {
-      type Out = Int
-      def apply(x: String) = x.length
-    }
-  }
-
-  println(f(3))      // It Works! It Works! It Works!
-  println(f("Foo"))  // 3
-}
-{%endhighlight%}
+```{.scala include=code/shapeless-poly/src/main/scala/shapelesspoly/AdHocPoly.scala snippet=body}
+```
 
 A polymorphic function has the ability to be called with arguments of different types, possibly also returning values of different types.
 
@@ -54,10 +29,10 @@ Shapeless' `Poly` treats a computation on an argument from a particular domain `
 
 To separate implicit `Case` instances of one `Poly` from those of others, `Case`s are further parameterised by the singleton type of the `Poly` they belong to: `Case[F, In]`. The `Poly` trait's `apply` method requires an implicit `Case` of the singleton type of that very `Poly`. This way, it is not possible to use a `Case[f.type, _]` to call any other function but `f`, because only `f` accepts a `Case` parameterised by `f.type`. For example:
 
-{%highlight scala%}
+```scala
 object g extends Poly
 println(g(3)(f.intCase))
-{%endhighlight%}
+```
 
 This will produce a compile-time error:
 
@@ -90,9 +65,62 @@ Now let us look at the files that are of interest to us, referring for simplicit
 - [`build.sbt`](https://github.com/milessabin/shapeless/blob/master/build.sbt) and [`project/Boilerplate.scala`](https://github.com/milessabin/shapeless/blob/master/project/Boilerplate.scala) - These two define how the synthetic sources are generated. `Boilerplate.scala` defines the templates and the generation logic, and `build.sbt` references this file. Although they are not directly relevant to the polymorphic functions in Shapeless, they are required for mechanics behind the synthetic source generation.
 
 ## Entities
-Click on the diagram to enlarge.
+```{.plantuml width=100%}
+PolyApply <|-- Poly : extends
+"Case[P, L <: HList]" <.. PolyApply : implicit
+"Case[P, L <: HList]" <.. Poly : implicit
 
-<img src="/media/learning-shapeless-poly/Poly.svg" alt="Diagram" width="650" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
+Poly <|-- Poly1 : extends
+Poly <|-- Poly2 : extends
+
+Poly1 <--+ "Poly1#CaseBuilder[A]"    : inner class
+Poly2 <--+ "Poly2#CaseBuilder[A, B]" : inner class
+
+Poly1 <|-- "~>[F[_], G[_]]" : extends
+
+class PolyApply << (T,aqua) synthetic/polyapply.scala >> {
+  def apply[A](a:A)(implicit cse : Case[this.type, A::HNil]): cse.Result = cse(a::HNil)
+
+  def apply[A, B](a:A, b:B)(implicit cse : Case[this.type, A::B::HNil]): cse.Result = cse(a::b::HNil)
+}
+
+class "Case[P, L <: HList]" << (T,aqua) core/poly.scala >> {
+  ---
+  type Result
+
+  val value : L => Result
+
+  def apply(t : L) = value(t)
+}
+
+class Poly << (T,aqua) core/poly.scala >> {
+  def apply[R](implicit c: Case.Aux[this.type, HNil, R]): R = c()
+}
+
+class Poly1 << (T,aqua) synthetic/polyntraits.scala >> {
+  ---
+  def at[A] = new CaseBuilder[A]
+}
+
+class Poly2 << (T,aqua) synthetic/polyntraits.scala >> {
+  ---
+  def at[A, B] = new CaseBuilder[A, B]
+}
+
+class "Poly1#CaseBuilder[A]" << (T,aqua) synthetic/polyntraits.scala >> {
+  def apply[Res](fn: (A) => Res): Case[this.type, A::HNil]
+}
+
+class "Poly2#CaseBuilder[A, B]" << (T,aqua) synthetic/polyntraits.scala >> {
+  def apply[Res](fn: (A, B) => Res): Case[this.type, A::B::HNil]
+}
+
+class "~>[F[_], G[_]]" << (T,aqua) core/poly.scala >> {
+  def apply[T](f : F[T]) : G[T]
+
+  implicit def caseUniv[T]: Case.Aux[this.type, F[T]::HNil, G[T]] = at[F[T]](apply(_))
+}
+```
 
 ### Poly
 The base class for all the polymorphic functions is `Poly`, located in `core/poly.scala`. Together with the synthetic `PolyApply` (see the diagram above), its main job is to provide a bunch of `apply` methods for calls of different number of arguments. The methods expect the actual logic of the calls to be defined in the form of `Case` type classes that should be available implicitly. Note how each `Poly` has `apply` methods of all possible arities, enabling to define one `Poly` to be called with different number of arguments.
@@ -105,17 +133,17 @@ One can also think of this as polymorphism not only on the types, but on the Car
 ### PolyN
 It may not be convenient to define `Case`s by hand using anonymous classes. Most of the time you want them to be derived from a function. Traits `Poly1` through `Poly22` exist for this reason. Located at `synthetic/polyntraits.scala`, they represent polymorphic functions of a certain arity. Their highlights are the `CaseBuilder` nested class which specialises on `Case` generation, and an `at` method to quickly get access to it. `CaseBuilder` has an `apply` method to produce `Case`s from a function, so in practice it looks like this:
 
-{%highlight scala%}
+```scala
 implicit val caseInt: poly.Case[this.type, Int] = at[Int] { x: Int => x * 2 }
-{%endhighlight%}
+```
 Much more concise than, say, this:
 
-{%highlight scala%}
+```scala
 implicit val caseInt = new poly.Case[f.type, Int] {
   type Out = Int
   def apply(x: Int) = x * 2
 }
-{%endhighlight%}
+```
 
 ### Natural transformations ~>
 Finally, one more trait worth attention is `~>`, which is located in `core/poly.scala`. It exists to support [natural transformations](https://en.wikipedia.org/wiki/Natural_transformation) and its highlight is an abstract `def apply[T](f : F[T]) : G[T]`. Note how in order to define a `~>` you do not need to provide implicit `Case`s, but only to implement that `apply` method. An implicit `Case`, `caseUniv` is provided by the trait and delegates the work to the implemented `apply` method.
@@ -123,28 +151,16 @@ Finally, one more trait worth attention is `~>`, which is located in `core/poly.
 # Usage
 Let us see how our *ad hoc* example from the "Core Principles" paragraph will look like in Shapeless:
 
-{%highlight scala%}
-object ShapelessPoly extends App {
-  import shapeless._
-  import poly._
-
-  object f extends Poly1 {
-    implicit val intCase    = at[Int   ] { x => "It Works! " * x }
-    implicit val stringCase = at[String] { x => x.length         }
-  }
-
-  println(f(3))      // It Works! It Works! It Works!
-  println(f("Foo"))  // 3
-}
-{%endhighlight%}
+```{.scala include=code/shapeless-poly/src/main/scala/shapelesspoly/ShapelessPoly.scala snippet=body}
+```
 
 Since we want a function defined on one argument, we extend `Poly1` to bring into the scope the convenience method `at` to build the corresponding `Case`s. The two `Case`s are for `Int` and `String` input arguments. When we call `at[T]`, we create a `CaseBuilder[T]`. When we call `apply(T => Result)` on it, a `Case[this.type, T]` is produced.
 
 In the `main` method, we call `f` twice. Each time, we invoke this method in `PolyApply`:
 
-{%highlight scala%}
+```scala
 def apply[A](a:A)(implicit cse : Case[this.type, A::HNil]): cse.Result = cse(a::HNil)
-{%endhighlight%}
+```
 
 This method requires an implicit `Case` in the scope. Among other things, the compiler looks for it in the companion of `this.type`, since this is a type parameter of the type of the implicit argument in question. The companion of `this.type` is `this`, which is `object f`. This object contains the required implicit `Case`s for each call. After the `Case` is found, the call is delegated to this type class.
 

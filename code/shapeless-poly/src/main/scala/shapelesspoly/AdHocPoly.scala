@@ -1,6 +1,7 @@
 package shapelesspoly
 
 object AdHocPoly extends App {
+  // start snippet body
   trait Case[F, In] {
     type Out
     def apply(x: In): Out
@@ -24,4 +25,5 @@ object AdHocPoly extends App {
 
   println(f(3))
   println(f("Foo"))
+  // end snippet body
 }

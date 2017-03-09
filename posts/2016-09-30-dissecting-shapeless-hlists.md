@@ -5,7 +5,7 @@ categories:
 - blog
 redirect_from: /blog/2016/09/30/learning-shapeless-hlists.html
 description: An overview of the architecture of Shapeless' heterogenous lists (HList).
-keywords: [scala,shapeless,functional programming,category theory,heterogenous list,hlist,software architecture]
+keywords: scala,shapeless,functional programming,category theory,heterogenous list,hlist,software architecture
 ---
 Shapeless is a Scala library that aims to make programming more type-safe. This means that you let the compiler know as much as possible about your program, so that if something is wrong with it, it is more likely to be caught during compile time.
 
@@ -18,15 +18,15 @@ An `HList` is a heterogenous list. It is a generalisation of Scala's tuples. Whi
 
 Make sure to `import shapeless._` before running the examples. Here is a simple `HList`:
 
-{% highlight scala %}
+```scala
 scala> val hlist = 1 :: 2 :: "foo" :: 3.5 :: HNil
 hlist: shapeless.::[Int,shapeless.::[Int,shapeless.::[String,shapeless.::[Double,shapeless.HNil]]]] = 1 :: 2 :: foo :: 3.5 :: HNil
-{% endhighlight %}
+```
 
 ## The head of an empty list
 Consider an example where we want to get the head of a list. Some lists are empty and this edge case should be handled somehow.
 
-{% highlight scala %}
+```scala
 scala> List(1).head
 res0: Int = 1
 
@@ -41,29 +41,29 @@ res2: Int = 1
 scala> HNil.head
 <console>:15: error: could not find implicit value for parameter c: shapeless.ops.hlist.IsHCons[shapeless.HNil.type]
        HNil.head
-{% endhighlight %}
+```
 
 A normal Scala `List` throws an exception during runtime, but in case of `HNil`, a compilation error happens. Hence, with a `List` you won't know about the error until you run the program and this code line gets executed. In case of `HList`, the error will be identified during the compilation, allowing you to fix it right away and reduce the risk of bugs.
 
 ## HList architecture
 Consider our previous example:
 
-{% highlight scala %}
+```scala
 scala> val hlist = 1 :: 2 :: "foo" :: 3.5 :: HNil
 hlist: shapeless.::[Int,shapeless.::[Int,shapeless.::[String,shapeless.::[Double,shapeless.HNil]]]] = 1 :: 2 :: foo :: 3.5 :: HNil
-{% endhighlight %}
+```
 
 The most interesting thing here is the type of this object and how it is constructed. It is `shapeless.::`, recursive in its right-hand side argument. This type is defined as follows:
 
-{% highlight scala %}
+```scala
 sealed trait HList extends Product with Serializable
 
 final case class ::[+H, +T <: HList](head : H, tail : T) extends HList
-{% endhighlight %}
+```
 
 There are two methods to help you construct `HList`s: one for `HNil`, which is an empty list, and one for `HList`, which is an arbitrary list:
 
-{% highlight scala %}
+```scala
 trait HNil extends HList {
   def ::[H](h : H) = shapeless.::(h, this)
 }
@@ -73,7 +73,7 @@ obejct HNil extends HNil
 trait HListOps {
   def ::[H](h : H) : H :: L = shapeless.::(h, l)
 }
-{% endhighlight %}
+```
 With `::` it is possible to construct lists by induction:
 
 - Given an arbitrary `H` and `T <: HList`, we can construct `H :: T`.
@@ -91,9 +91,9 @@ The [syntax](https://github.com/milessabin/shapeless/blob/master/core/src/main/s
 
 The operations defined in `HListOps` follow a common pattern. For example:
 
-{% highlight scala %}
+```scala
 def head(implicit c : IsHCons[L]) : c.H = c.head(l)
-{% endhighlight %}
+```
 
 This method returns a first element of a list. Some observations to make here:
 
@@ -106,7 +106,7 @@ The [operations](https://github.com/milessabin/shapeless/blob/master/core/src/ma
 
 To understand their architecture, let us look at an example of `IsHCons` type class. This is a type class required implicitly by the `head` method discussed above, and it defines how to split an `HList` `L` into a head `H` and a tail `T <: HList`:
 
-{% highlight scala %}
+```scala
   trait IsHCons[L <: HList] extends Serializable {
     type H
     type T <: HList
@@ -128,7 +128,7 @@ To understand their architecture, let us look at an example of `IsHCons` type cl
         def tail(l : H0 :: T0) : T = l.tail
       }
   }
-{% endhighlight %}
+```
 
 Some observations to make here:
 
@@ -146,9 +146,9 @@ First, the target `HList` is converted implicitly to `HListOps`, which has the m
 
 There is one `implicit def` in the companion object of `IsHCons`. It has the following signature:
 
-{% highlight scala %}
+```scala
 implicit def hlistIsHCons[H0, T0 <: HList]: IsHCons.Aux[H0 :: T0, H0, T0]
-{% endhighlight %}
+```
 
 In case of `Int :: HNil`, the required type is `IsHCons[Int :: HNil]` and `IsHCons.Aux[H0 :: T0, H0, T0]` conforms to it because this type is an alias for `IsHCons[H0 :: T0]` with `H0` and `T0` output types (one for the head and one for the tail). So the implicit is found and the compilation succeeds.
 
@@ -159,11 +159,11 @@ Recall that the output types of the `HList` operations are often defined by the 
 
 In Shapeless, a common pattern is to define implicit `def`s that themselves require some implicit type classes. For example, the following implicits are available for the `Length` type class, which computes the length of a given `HList`:
 
-{% highlight scala %}
+```scala
 implicit def hnilLength[L <: HNil]: Length.Aux[L, _0]
 
 implicit def hlistLength[H, T <: HList, N <: Nat](implicit lt : Length.Aux[T, N], sn : Witness.Aux[Succ[N]]): Length.Aux[H :: T, Succ[N]]
-{% endhighlight %}
+```
 
 A key thing to notice here is that `implicit def hlistLength` itself requires implicit arguments. Moreover, the output type of one of these arguments is the same as the one of the `implicit def hlistLength` method itself. This triggers inductive search for implicits during compile time, where in order to resolve `Length[H :: T]` type class, we need to resolve `Length[T]` first.
 
