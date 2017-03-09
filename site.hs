@@ -78,6 +78,10 @@ main = hakyll $ do
       posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots "posts/*" "content"
       renderAtom feedConfig feedCtx posts
 
+  create ["404.html", "CNAME", "favicon.png"] $ do
+    route idRoute
+    compile copyFileCompiler
+
 
 --------------------------------------------------------------------------------
 postCtx :: Context String
