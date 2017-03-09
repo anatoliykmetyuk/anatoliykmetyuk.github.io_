@@ -4,7 +4,7 @@ title: Rewriting Process Algebra, Part 3&#58; FreeACP Implementation
 categories:
 - blog
 description: A rewriting-based process algebra implementation in Scala.
-keywords: [process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming]
+keywords: process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming
 ---
 This is the third part of my progress report on a rewriting-based implementation of [SubScript](https://github.com/scala-subscript/subscript), [FreeACP](https://github.com/anatoliykmetyuk/free-acp). This part covers the architecture of FreeACP I came up with so far while implementing the rewriting engine for SubScript.
 
@@ -56,15 +56,15 @@ Next, the user can select whichever `S` they want to execute their program under
 
 In our example of the `setText` AA, one may define the following class to represent its action:
 
-{% highlight scala %}
+```scala
 case class SetText[TF](textField: TF, string: String) extends LanguageT[Result[LanguageT]]
-{% endhighlight %}
+```
 
 It contains all the data necessary to set the text of the text field, but does not say anything about *how* to do it. Then, one can define a different natural transformation `LanguageT ~> S` for each GUI framework they are working under, each specifying the way this particular framework performs this action. This way, a GUI controller can be written once and executed on many GUI frameworks.
 
 For example, such a natural transformation under Swing may look like:
 
-{% highlight scala %}
+```scala
 new (LanguageT ~> Future) {
   override def apply[A](t: LanguageT[A]): Future[A] =
     t match {
@@ -75,7 +75,7 @@ new (LanguageT ~> Future) {
         }
     }
 }
-{% endhighlight %}
+```
 
 The point to notice here is that all the things specific to the GUI framework are encapsulated in this compiler, and hence one program can be executed under many GUI frameworks, provided one has proper compilers for these frameworks.
 
