@@ -4,7 +4,7 @@ title: Rewriting Process Algebra, Part 2&#58; Engine Theory
 categories:
 - blog
 description: A rewriting-based process algebra implementation in Scala.
-keywords: [process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming]
+keywords: process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming
 ---
 This is a second part of a progress report on my attempt to model a process algebra as an expression rewriting machine. This part covers the theoretical foundations of the two implementations (engines) of SubScript: the [standard one](https://github.com/scala-subscript/subscript), and [FreeACP](https://github.com/anatoliykmetyuk/free-acp), the one I am building. The other two parts:
 
@@ -26,11 +26,66 @@ These reported events include:
 ## Example
 Let us have a look at how our GUI example from [Part 1](/blog/2017/01/11/rewriting-process-algebra-part-1-introduction-to-process-algebra.html) of this series would have been executed in the standard implementation:
 
-1. A hierarchy of actors (nodes) is created: <img src="/media/rewriting-process-algebra-part-2-engine-theory/SubScriptActors.svg" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/> Note that under the `*` operators, only the `button()` operands are created, but not the `setText()` ones. This is because in `button(first) * setText(textField, "Hello World")`, the `setText(textField, "Hello World")` operand is not evaluated until `button(first)` finishes successfully - hence, `setText()` can be ignored until such an event happens.
+1. A hierarchy of actors (nodes) is created:
+```graphviz
+digraph G {
+    rankdir="BT";
+    fontname="sans-serif";
+    penwidth="0.1";
+    edge [comment="Wildcard edge", 
+          fontname="sans-serif", 
+          fontsize=10, 
+          colorscheme="blues3", 
+          color=2, 
+          fontcolor=3];
+    node [fontname="serif", 
+          fontsize=13, 
+          fillcolor="1", 
+          colorscheme="blues4", 
+          color="2", 
+          fontcolor="4", 
+          style="filled"];
+    "+";
+    "*1" [label="*"];
+    "*2" [label="*"];
+    "b1" [label="button(first)"];
+    "b2" [label="button(second)"];
+    "*2" -> "+";
+    "b1" -> "*1";
+    "b2" -> "*2";
+    "*1" -> "+";
+}
+```
+Note that under the `*` operators, only the `button()` operands are created, but not the `setText()` ones. This is because in `button(first) * setText(textField, "Hello World")`, the `setText(textField, "Hello World")` operand is not evaluated until `button(first)` finishes successfully - hence, `setText()` can be ignored until such an event happens.
 
 2. When the button `first` is pressed, `button(first)` is finishes its evaluation (execution) with success - `ε`. The corresponding actor sends this event as a message to its supervising actor, `*`, and stops itself, removing itself from the hierarchy. `*` in turn forwards the message to `+`. Both these actors have the information that `first` has successfully finished at this point.
 3. `+` acts upon this information by cancelling its second operand
-4. `*` acts upon this information by instantiating an actor corresponding to its second operand, `setText(textField, "Hello World")`, and sending a message to it, ordering it to start execution. The resulting hierarchy after this step is as follows: <img src="/media/rewriting-process-algebra-part-2-engine-theory/SubScriptActors2.svg" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
+4. `*` acts upon this information by instantiating an actor corresponding to its second operand, `setText(textField, "Hello World")`, and sending a message to it, ordering it to start execution. The resulting hierarchy after this step is as follows: 
+```graphviz
+digraph G {
+    rankdir="BT";
+    fontname="sans-serif";
+    penwidth="0.1";
+    edge [comment="Wildcard edge", 
+          fontname="sans-serif", 
+          fontsize=10, 
+          colorscheme="blues3", 
+          color=2, 
+          fontcolor=3];
+    node [fontname="serif", 
+          fontsize=13, 
+          fillcolor="1", 
+          colorscheme="blues4", 
+          color="2", 
+          fontcolor="4", 
+          style="filled"];
+    "+";
+    "*";
+    "setText(textField, \"Hello World\")";
+    "setText(textField, \"Hello World\")" -> "*";
+    "*" -> "+";
+}
+```
 
 ## Problem
 Actors and communication between them are hard to explore in mathematical fashion. This is why, the motivation for an alternative implementation of SubScript, FreeACP, is to define an engine for SubScript in mathematical terms rather than engineering ones.
@@ -47,7 +102,11 @@ Let us see how our GUI example behaves under the rewriting approach.
 
 First, we need to define the axioms we are working under (note that the axioms below are ad-hoc ones, for the sake of this example only. The real engine is built upon different axioms):
 
-<img src="/media/rewriting-process-algebra-part-2-engine-theory/axioms-1.gif" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
+$\\(1):\frac{ax+by}{a:\varepsilon \rightarrow x; \delta \rightarrow by}\\
+\phantom{(1):)} b:\varepsilon \rightarrow y; \delta \rightarrow ax
+\\(2):\frac{ax}{a: r \rightarrow rx}
+\\(3):\varepsilon x = x\varepsilon = x
+\\(4):\delta x = \delta$
 
 The axioms with the horizontal bar are further discussed in the "Axioms" section. Roughly, they dictate how to evaluate the expressions above the bar, and, depending on the result of this evaluation, rewrite the expression as described by the right-hand side expression of the arrow.
 
@@ -55,10 +114,10 @@ For example, `(1)` should be interpreted as follows. Given an expression of the 
 
 Now let us return to our GUI example:
 
-{% highlight scala %}
+```scala
 button(first ) * setText(textField, "Hello World"   ) +
 button(second) * setText(textField, "Something Else")
-{% endhighlight %}
+```
 
 Under `(1)` axiom, we need to evaluate the first AAs of both expressions - operands of `+`, see which one has completed first and rewrite the expression according to the axiom
 
@@ -74,7 +133,14 @@ Hence, there are two kinds of axioms: rewriting axioms and suspension axioms. Th
 
 For example, this is a set of axioms for the sequential composition of processes:
 
-<img src="/media/rewriting-process-algebra-part-2-engine-theory/axioms-2.gif" alt="Diagram" onclick="window.open(this.src)" onmouseover="this.style.cursor='pointer'"/>
+$\\\textbf{Rewriting Axioms}
+\\\phantom{ }[*]() = \varepsilon
+\\\phantom{ }[*]([*](x)::y) = [*](x::y)
+\\\phantom{ }[*](\varepsilon::x) = x
+\\\phantom{ }[*](\delta::x) = \delta
+\\
+\\\textbf{Suspension Axioms}
+\\\frac{[*](a::x)}{a\rightarrow[*](r::x)}$
 
 A sequence is presented as `[*](list)`, where `list` is a list of expressions, and `::` is concatenation.
 
