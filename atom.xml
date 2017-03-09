@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Blog of Anatolii Kmetiuk</title>
+    <link href="http://akmetiuk.com/atom.xml" rel="self" />
+    <link href="http://akmetiuk.com" />
+    <id>http://akmetiuk.com/atom.xml</id>
+    <author>
+        <name>Anatolii Kmetiuk</name>
+        <email>anatoliykmetyuk@gmail.com</email>
+    </author>
+    <updated>2017-01-13T00:00:00Z</updated>
+    <entry>
+    <title>Rewriting Process Algebra, Part 3&#58; FreeACP Implementation</title>
+    <link href="http://akmetiuk.com/posts/2017-01-13-rewriting-process-algebra-part-3-freeacp-implementation.html" />
+    <id>http://akmetiuk.com/posts/2017-01-13-rewriting-process-algebra-part-3-freeacp-implementation.html</id>
+    <published>2017-01-13T00:00:00Z</published>
+    <updated>2017-01-13T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A rewriting-based process algebra implementation in Scala.]]></summary>
+</entry>
+<entry>
+    <title>Rewriting Process Algebra, Part 2&#58; Engine Theory</title>
+    <link href="http://akmetiuk.com/posts/2017-01-12-rewriting-process-algebra-part-2-engine-theory.html" />
+    <id>http://akmetiuk.com/posts/2017-01-12-rewriting-process-algebra-part-2-engine-theory.html</id>
+    <published>2017-01-12T00:00:00Z</published>
+    <updated>2017-01-12T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A rewriting-based process algebra implementation in Scala.]]></summary>
+</entry>
+<entry>
+    <title>Rewriting Process Algebra, Part 1&#58; Introduction to Process Algebra</title>
+    <link href="http://akmetiuk.com/posts/2017-01-11-rewriting-process-algebra-part-1-introduction-to-process-algebra.html" />
+    <id>http://akmetiuk.com/posts/2017-01-11-rewriting-process-algebra-part-1-introduction-to-process-algebra.html</id>
+    <published>2017-01-11T00:00:00Z</published>
+    <updated>2017-01-11T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A rewriting-based process algebra implementation in Scala.]]></summary>
+</entry>
+<entry>
+    <title>Dissecting Shapeless&#58; Poly</title>
+    <link href="http://akmetiuk.com/posts/2016-10-09-dissecting-shapeless-poly.html" />
+    <id>http://akmetiuk.com/posts/2016-10-09-dissecting-shapeless-poly.html</id>
+    <published>2016-10-09T00:00:00Z</published>
+    <updated>2016-10-09T00:00:00Z</updated>
+    <summary type="html"><![CDATA[An overview of the architecture of Shapeless' Polymorphic functions (Poly).]]></summary>
+</entry>
+<entry>
+    <title>Dissecting Shapeless&#58; HLists</title>
+    <link href="http://akmetiuk.com/posts/2016-09-30-dissecting-shapeless-hlists.html" />
+    <id>http://akmetiuk.com/posts/2016-09-30-dissecting-shapeless-hlists.html</id>
+    <published>2016-09-30T00:00:00Z</published>
+    <updated>2016-09-30T00:00:00Z</updated>
+    <summary type="html"><![CDATA[An overview of the architecture of Shapeless' heterogenous lists (HList).]]></summary>
+</entry>
+<entry>
+    <title>How to split monolithic commit history in git</title>
+    <link href="http://akmetiuk.com/posts/2016-08-10-splitting-monolitic-commits.html" />
+    <id>http://akmetiuk.com/posts/2016-08-10-splitting-monolitic-commits.html</id>
+    <published>2016-08-10T00:00:00Z</published>
+    <updated>2016-08-10T00:00:00Z</updated>
+    <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
+</entry>
+<entry>
+    <title>Thread safety of SubScript values (and other scoped references)</title>
+    <link href="http://akmetiuk.com/posts/2016-04-13-subscript-values-in-by-name-calls.html" />
+    <id>http://akmetiuk.com/posts/2016-04-13-subscript-values-in-by-name-calls.html</id>
+    <published>2016-04-13T00:00:00Z</published>
+    <updated>2016-04-13T00:00:00Z</updated>
+    <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
+</entry>
+<entry>
+    <title>SubScript - A Brief Progress Report</title>
+    <link href="http://akmetiuk.com/posts/2016-04-08-subscript-progress-report.html" />
+    <id>http://akmetiuk.com/posts/2016-04-08-subscript-progress-report.html</id>
+    <published>2016-04-08T00:00:00Z</published>
+    <updated>2016-04-08T00:00:00Z</updated>
+    <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
+</entry>
+<entry>
+    <title>Compiling Caffe under Mac OS X with Anaconda dependencies</title>
+    <link href="http://akmetiuk.com/posts/2016-03-29-compiling-caffe.html" />
+    <id>http://akmetiuk.com/posts/2016-03-29-compiling-caffe.html</id>
+    <published>2016-03-29T00:00:00Z</published>
+    <updated>2016-03-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A guide on how to get the Caffe framwork compiled.]]></summary>
+</entry>
+
+</feed>
