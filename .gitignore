@@ -1,0 +1,6 @@
+.stack-work/
+_cache/
+_site/
+graphviz-images/
+plantuml-images/
+plugins/
