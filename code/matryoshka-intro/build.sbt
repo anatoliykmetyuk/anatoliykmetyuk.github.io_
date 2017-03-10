@@ -5,7 +5,7 @@ val Shapeless     = "2.3.2"
 val Scalacheck    = "1.13.4"
 val KindProjector = "0.9.3"
 val FS2           = "0.9.4"
-val Matryoshka    = "0.16.5"
+val Matryoshka    = "0.18.0"
 
 val ScalacheckMinTests = 1000
 
