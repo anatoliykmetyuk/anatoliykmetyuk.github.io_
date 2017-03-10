@@ -5,6 +5,7 @@ import matryoshka.data.Fix
 import matryoshka.implicits._
 
 object C3Matryoshka extends App with C2Defs {
+  // start snippet Examples
   // Nat to Int
   def natToInt[T](n: T)(implicit T: Recursive.Aux[T, Nat]): Int = n.cata[Int] {
     case Succ(x) => 1 + x
@@ -53,4 +54,5 @@ object C3Matryoshka extends App with C2Defs {
     ).embed
   val exprRes: Int = eval( expr[Fix[Expr]] )
   println(exprRes)  // 9
+  // end snippet Examples
 }
