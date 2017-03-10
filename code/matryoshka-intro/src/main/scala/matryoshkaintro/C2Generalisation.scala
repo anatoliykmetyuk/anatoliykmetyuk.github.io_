@@ -3,6 +3,7 @@ package matryoshkaintro
 import scalaz._, Scalaz._
 
 object C2Generalisation extends App with C2Defs with C2Cata {
+  // start snippet Examples
   // Nat to Int
   def natToInt(n: Fix[Nat]): Int = cata[Nat, Int](n) {
     case Succ(x) => 1 + x
@@ -51,9 +52,11 @@ object C2Generalisation extends App with C2Defs with C2Cata {
     ))
   val exprRes: Int = eval( expr )
   println(exprRes)  // 9
+  // end snippet Examples
 }
 
 trait C2Defs {
+  // start snippet Defs
   // Nat
   sealed trait Nat [+A]
   case class   Succ[A ](x: A) extends Nat[A      ]
@@ -69,7 +72,9 @@ trait C2Defs {
   case class   Add [A ](x1: A, x2: A) extends Expr[A      ]
   case class   Mult[A ](x1: A, x2: A) extends Expr[A      ]
   case class   Num     (x : Int     ) extends Expr[Nothing]
+  // end snippet Defs
 
+  // start snippet Functors
   // Functors
   implicit val natFunct: Functor[Nat] = new Functor[Nat] {
     def map[A, B](fa: Nat[A])(f: A => B): Nat[B] = fa match {
@@ -92,18 +97,25 @@ trait C2Defs {
       case x@Num(_     ) => x
     }
   }
+  // end snippet Functors
 }
 
 trait C2Cata {
+  // start snippet CataWrong
   // Catamorphism draft
   // WARNING: DOES NOT COMPILE
   // def cata[F[_]: Functor, T, A](structure: F[T])(algebra: F[A] => A): A =
   //   algebra( structure.map(cata(_)(algebra)) )
+  // end snippet CataWrong
 
+  // start snippet Fix
   // Fixed point type
   case class Fix[F[_]](unfix: F[Fix[F]])
+  // end snippet Fix
 
+  // start snippet CataRight
   // Catamorphism
   def cata[F[_]: Functor, A](structure: Fix[F])(algebra: F[A] => A): A =
     algebra( structure.unfix.map(cata(_)(algebra)) )
+  // end snippet CataRight
 }
