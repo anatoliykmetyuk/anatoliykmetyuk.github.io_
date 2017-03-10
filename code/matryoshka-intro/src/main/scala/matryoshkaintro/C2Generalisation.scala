@@ -59,19 +59,19 @@ trait C2Defs {
   // start snippet Defs
   // Nat
   sealed trait Nat [+A]
-  case class   Succ[A ](x: A) extends Nat[A      ]
-  case object  Zero           extends Nat[Nothing]
+  case class   Succ[ A](previous: A) extends Nat[A      ]
+  case object  Zero                  extends Nat[Nothing]
 
   // List
   sealed trait IntList[+A]
-  case class   Cons   [A ](head: Int, tail: A) extends IntList[A]
+  case class   Cons   [ A](head: Int, tail: A) extends IntList[A]
   case object  Empty extends IntList[Nothing]
 
   // Expr
   sealed trait Expr[+A]
-  case class   Add [A ](x1: A, x2: A) extends Expr[A      ]
-  case class   Mult[A ](x1: A, x2: A) extends Expr[A      ]
-  case class   Num     (x : Int     ) extends Expr[Nothing]
+  case class   Add [ A](expr1  : A, expr2: A) extends Expr[A      ]
+  case class   Mult[ A](expr1  : A, expr2: A) extends Expr[A      ]
+  case class   Num     (literal: Int        ) extends Expr[Nothing]
   // end snippet Defs
 
   // start snippet Functors
