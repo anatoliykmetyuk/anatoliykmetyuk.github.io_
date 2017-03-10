@@ -8,8 +8,16 @@
         <name>Anatolii Kmetiuk</name>
         <email>anatoliykmetyuk@gmail.com</email>
     </author>
-    <updated>2017-01-13T00:00:00Z</updated>
+    <updated>2017-03-10T00:00:00Z</updated>
     <entry>
+    <title>Introduction to Recursion Schemes with Matryoshka</title>
+    <link href="http://akmetiuk.com/posts/2017-03-10-matryoshka-intro.html" />
+    <id>http://akmetiuk.com/posts/2017-03-10-matryoshka-intro.html</id>
+    <published>2017-03-10T00:00:00Z</published>
+    <updated>2017-03-10T00:00:00Z</updated>
+    <summary type="html"><![CDATA[Motivation for the recursion schemes based on fixed point types and their implementation in Matryoshka.]]></summary>
+</entry>
+<entry>
     <title>Rewriting Process Algebra, Part 3&#58; FreeACP Implementation</title>
     <link href="http://akmetiuk.com/posts/2017-01-13-rewriting-process-algebra-part-3-freeacp-implementation.html" />
     <id>http://akmetiuk.com/posts/2017-01-13-rewriting-process-algebra-part-3-freeacp-implementation.html</id>
