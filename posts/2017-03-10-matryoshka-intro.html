@@ -214,9 +214,9 @@
 <p>Finally, for the <code>Expr</code> <a href="#expr_diagram">above</a>, the next step is to evaluate both of its two substructures:</p>
 <p><img src="../graphviz-images/c5ccbcb94b2247e6938b3de7b0869d9ceaf1c14f.png" /></p>
 <p>This is an <code>Add[Int](expr1 = 6, expr2 = 3)</code>, and the next step is to collapse it by doing <code>6 + 3</code>.</p>
-<p>We are dealing with a <em>structure-preserving transformation</em> here. Probably you have already recognized how the above job can be easily done with functors.</p>
+<p>We are dealing with a <em>structure-preserving transformation</em> here. These kind of transformations are well understood in terms of <a href="https://en.wikipedia.org/wiki/Functor">functors</a>.</p>
 <p>If we redefine our recursive structures such that they are parameterized by the type of their substructure, their types will have a form <code>F[A]</code> and we will be able to define functor instances for them.</p>
-<p>Ordinarily, <code>A</code> in these <code>F[A]</code> is another <code>F[_]</code> - a substructure, reflecting the recursive nature of the parent structure. In our examples, we first do a <code>map</code>, turning <code>F[A]</code> into <code>F[B]</code>, where <code>B</code> is the type we are evaluating the structure into (in all our examples, <code>B</code> is <code>Int</code>). Next, given <code>F[B]</code>, we collapse it into a <code>B</code>. A function <code>F[B] =&gt; B</code> is called an <em>Algebra</em>.</p>
+<p>Ordinarily, <code>A</code> in these <code>F[A]</code> is another <code>F[_]</code> (a substructure, reflecting the recursive nature of the parent structure) or <code>Nothing</code> (for terminal elements that do not have substructures). In our examples, we first do a <code>map</code>, turning <code>F[A]</code> into <code>F[B]</code>, where <code>B</code> is the type we are evaluating the structure into (in all our examples, <code>B</code> is <code>Int</code>). Next, given <code>F[B]</code>, we collapse it into a <code>B</code>. A function <code>F[B] =&gt; B</code> is called an <em>Algebra</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>.</p>
 <p>Now let us see how this theory can be applied in practice.</p>
 <h2 id="new-definitions-for-the-recursive-structures">New definitions for the recursive structures</h2>
 <p>In all our data structures, we need to specify the type of the substructures as a type parameter, so that we can then evaluate these substructures in a way that preserves the parent structure, via <code>map</code>.</p>
@@ -237,7 +237,7 @@
 <span class="kw">case</span> <span class="kw">class</span>   Mult[ A](expr1  : A, expr2: A) <span class="kw">extends</span> Expr[A      ]
 <span class="kw">case</span> <span class="kw">class</span>   <span class="fu">Num</span>     (literal: Int        ) <span class="kw">extends</span> Expr[Nothing]</code></pre></div>
 <h2 id="functors">Functors</h2>
-<p>If we want to use <code>map</code> on these data structures, they need functor instances. The definitions below are straightforward (do not forget to <code>import scalaz._, Scalaz._</code>):</p>
+<p>If we want to use <code>map</code> on these data structures, they need functor instances. The definitions below are straightforward (do not forget to <code>import scalaz._, Scalaz._</code>, which is needed to bring functors in scope):</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="co">// Functors</span>
 <span class="kw">implicit</span> <span class="kw">val</span> natFunct: Functor[Nat] = <span class="kw">new</span> Functor[Nat] {
   <span class="kw">def</span> map[A, B](fa: Nat[A])(f: A =&gt; B): Nat[B] = fa <span class="kw">match</span> {
@@ -261,7 +261,7 @@
   }
 }</code></pre></div>
 <h2 id="catamorphism-first-attempt">Catamorphism: first attempt</h2>
-<p>As discussed above, all we need to collapse a recursive structure is to map its substructures by the collapse function and then evaluate the resulting structure via an algebra. This recursion scheme is called a <em>catamorphism</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Let us try to define it:</p>
+<p>As discussed above, all we need to collapse a recursive structure is to map its substructures by the collapse function and then evaluate the resulting structure via an algebra. This recursion scheme is called a <em>catamorphism</em><a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>. Let us try to define it:</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="co">// Catamorphism draft</span>
 <span class="co">// WARNING: DOES NOT COMPILE</span>
 <span class="co">// def cata[F[_]: Functor, T, A](structure: F[T])(algebra: F[A] =&gt; A): A =</span>
@@ -426,7 +426,9 @@
 <hr />
 <ol>
 <li id="fn1"><p><a href="https://twitter.com/headinthebox/status/384105824315928577?lang=en" class="uri">https://twitter.com/headinthebox/status/384105824315928577?lang=en</a><a href="#fnref1">↩</a></p></li>
-<li id="fn2"><p><a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125" class="uri">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125</a><a href="#fnref2">↩</a></p></li>
+<li id="fn2"><p><a href="https://github.com/slamdata/matryoshka/blob/8dbabe9a9c21158abdb1d4d5ff2fe7a1f416f1d6/core/shared/src/main/scala/matryoshka/package.scala#L53">Matryoshka definition</a><a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://en.wikipedia.org/wiki/F-algebra" class="uri">https://en.wikipedia.org/wiki/F-algebra</a><a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p><a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125" class="uri">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125</a><a href="#fnref4">↩</a></p></li>
 </ol>
 </div>
 </div>
