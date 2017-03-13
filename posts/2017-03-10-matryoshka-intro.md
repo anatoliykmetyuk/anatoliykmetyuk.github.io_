@@ -209,13 +209,16 @@ digraph G { label=" Structure " rankdir=TB newrank=true
 
 This is an `Add[Int](expr1 = 6, expr2 = 3)`, and the next step is to collapse it by doing `6 + 3`.
 
-We are dealing with a *structure-preserving transformation* here. Probably you have already recognized how the above job can be easily done with functors.
+We are dealing with a *structure-preserving transformation* here. These kind of transformations are well understood in terms of [functors](https://en.wikipedia.org/wiki/Functor).
 
 If we redefine our recursive structures such that they are parameterized by the type of their substructure, their types will have a form `F[A]` and we will be able to define functor instances for them.
 
-Ordinarily, `A` in these `F[A]` is another `F[_]` - a substructure, reflecting the recursive nature of the parent structure. In our examples, we first do a `map`, turning `F[A]` into `F[B]`, where `B` is the type we are evaluating the structure into (in all our examples, `B` is `Int`). Next, given `F[B]`, we collapse it into a `B`. A function `F[B] => B` is called an *Algebra*.
+Ordinarily, `A` in these `F[A]` is another `F[_]` (a substructure, reflecting the recursive nature of the parent structure) or `Nothing` (for terminal elements that do not have substructures). In our examples, we first do a `map`, turning `F[A]` into `F[B]`, where `B` is the type we are evaluating the structure into (in all our examples, `B` is `Int`). Next, given `F[B]`, we collapse it into a `B`. A function `F[B] => B` is called an *Algebra*[^3][^4].
 
 Now let us see how this theory can be applied in practice.
+
+[^3]: [Matryoshka definition](https://github.com/slamdata/matryoshka/blob/8dbabe9a9c21158abdb1d4d5ff2fe7a1f416f1d6/core/shared/src/main/scala/matryoshka/package.scala#L53)
+[^4]: [https://en.wikipedia.org/wiki/F-algebra](https://en.wikipedia.org/wiki/F-algebra)
 
 ## New definitions for the recursive structures
 In all our data structures, we need to specify the type of the substructures as a type parameter, so that we can then evaluate these substructures in a way that preserves the parent structure, via `map`.
@@ -226,7 +229,7 @@ The new definitions can go as follows:
 ```
 
 ## Functors
-If we want to use `map` on these data structures, they need functor instances. The definitions below are straightforward (do not forget to `import scalaz._, Scalaz._`):
+If we want to use `map` on these data structures, they need functor instances. The definitions below are straightforward (do not forget to `import scalaz._, Scalaz._`, which is needed to bring functors in scope):
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C2Generalisation.scala" snippet="Functors"}
 ```
