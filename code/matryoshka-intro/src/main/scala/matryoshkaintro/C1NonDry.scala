@@ -8,7 +8,7 @@ object C1NonDry extends App with C1Defs {
     case Zero    => 0
   }
   val nat = Succ(Succ(Succ(Zero)))
-  val natRes: Int = natToInt( nat )
+  val natRes: Int = natToInt(nat)
   println(natRes)  // 3
   // end snippet NatEx
 
@@ -19,7 +19,7 @@ object C1NonDry extends App with C1Defs {
     case Empty            => 0
   }
   val lst = Cons(1, Cons(2, Cons(3, Empty)))
-  val listRes: Int = sumList( lst )
+  val listRes: Int = sumList(lst)
   println(listRes)  // 6
   // end snippet ListEx
 
@@ -31,7 +31,7 @@ object C1NonDry extends App with C1Defs {
     case Num (x)      => x
   }
   val expr = Add(Mult(Num(2), Num(3)), Num(3))
-  val exprRes = eval( expr )
+  val exprRes = eval(expr)
   println(exprRes)  // 9
   // end snippet ExprEx
 }

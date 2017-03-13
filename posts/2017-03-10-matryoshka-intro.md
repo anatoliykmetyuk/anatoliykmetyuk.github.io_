@@ -2,7 +2,7 @@
 title: Introduction to Recursion Schemes with Matryoshka
 categories:
 - blog
-description: Motivation for the recursion schemes based on fixed point types and their implementation in Matryoshka.
+description: Motivation for the recursion schemes based on fixed-point types and their implementation in Matryoshka.
 keywords: scala,programming,functional programming,category theory,recursion schemes,matryoshka,catamorphism,recursion
 ---
 > Recursion is the GOTO of functional programming - Erik Meijer[^1]
@@ -10,23 +10,23 @@ keywords: scala,programming,functional programming,category theory,recursion sch
 [^1]: [https://twitter.com/headinthebox/status/384105824315928577?lang=en](https://twitter.com/headinthebox/status/384105824315928577?lang=en)
 
 # Recursive data structures
-In our daily programming life, we encounter recursive data structures on a regular basis. The most known examples include linked lists and trees. Often working with such data structures we have a need to evaluate (collapse) them to a value. For example: 
+In our daily programming life, we encounter recursive data structures on a regular basis. The best-known examples include linked lists and trees. Often working with such data structures we have a need to evaluate (collapse) them to a value. For example: 
 
-- Given a list of integers, say `1, 2, 3` one may want to find their sum - `6`.
+- Given a list of integers, say 1, 2 and 3, one may want to find their sum 6.
 - Given a parser of arithmetic expressions, such as `2 * 3 + 3`, we can expect it to produce a tree out of that expression - `Add(Mult(Num(2), Num(3)), Num(3))`. Such trees often need to be evaluated by actually performing these mathematical operations.
 - A more abstract example: natural numbers. Given the number zero and an ability to construct a successor of any natural number, you can construct all the natural numbers. If `Zero` is such a zero number, and `Succ(x)` constructs a natural number following `x`, `Succ(Succ(Succ(Zero)))` can represent `3`. This is also a recursive structure, and the simplest operation you want to do on it is to actually evaluate it to an `Int`: `Nat => Int`.
 
-In this article, we shall see how all of these examples involve recursion. [DRY](https://en.wikipedia.org/wiki/Don't_repeat_yourself) - Don't Repeat Yourself - is one of the fundamental principles of programming - so, if we repeat recursion from example to example, we should abstract it away. We shall see how to do that.
+In this article, we shall see how all of these examples involve recursion. [Don't Repeat Yourself (DRY)](https://en.wikipedia.org/wiki/Don't_repeat_yourself) is one of the fundamental principles of programming - so, if we repeat recursion from example to example, we should abstract it away. We shall see how to do that.
 
 But first, let us set the foundation by doing all of the above examples in code.
 
 ## Natural Numbers
-Here is how a natural numbers implementation might look like:
+Here is how an implementation of natural numbers might look like:
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C1NonDry.scala" snippet="NatDef"}
 ```
 
-And here is a visualization of the number `3` represented this way:
+And here is a visualization of the number 3 represented this way:
 
 ```{.graphviz width=100% #nat_diagram}
 digraph G { label="Structure" rankdir=LR
@@ -48,9 +48,9 @@ digraph G { label="Structure" rankdir=LR
 } 
 ```
 
-Note the recursive nature of this structure: a smaller substructure of the same type is present in every structure (except the terminal one, `Zero`).
+This would correspond to `Succ(Succ(Succ(Zero)))`. Note the recursive nature of this structure: a smaller substructure of the same type is present in every structure (except the terminal one, `Zero`).
 
-Now let us see how to evaluate a natural number to an `Int`. In order to do this for an arbitrary `Succ(x)`, we need to evaluate `x` and add `1` to the result. `Zero` should evaluate to `0`:
+Now, let us see how to evaluate a natural number to an `Int`. In order to do this for an arbitrary `Succ(x)`, we need to evaluate `x` and add 1 to the result. `Zero` should evaluate to 0:
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C1NonDry.scala" snippet="NatEx"}
 ```
@@ -90,7 +90,7 @@ digraph G { label="Structure" rankdir=TB newrank=true
 }
 ```
 
-In order to find a sum of all the elements of a list, we should add its `head` to the sum of all the elements of its `tail`. If the list is `Empty`, the result of the summation is `0`:
+In order to find the sum of all the elements in a list, we should add its `head` to the sum of all the elements of its `tail`. If the list is `Empty`, the result of the summation is 0:
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C1NonDry.scala" snippet="ListEx"}
 ```
@@ -143,12 +143,12 @@ Intuitively, every example above is similar. All of them involve a recursive str
 - Every example works on a **recursive structure - a structure that has substructures** of the same type as parts of itself.
 - They all involve **recursive calls in order to transform these substructures**. So, `natToInt` is called recursively on `previous` in order to evaluate `Succ(previous)`.
 - **The results** of these transformations **are combined according to the parent structure**.
-    - In `sumList( Cons(head, tail) )`, `head` is a part of the parent structure. `tail` is a substructure that is evaluated recursively via `sumList(tail)` and then combined with that `head` via addition.
+    - In `sumList(Cons(head, tail))`, `head` is a part of the parent structure. `tail` is a substructure that is evaluated recursively via `sumList(tail)` and then combined with that `head` via addition.
     - In `eval` of either `Add` or `Mult`, we first need to call `eval` on the child expressions of these nodes, and then combine them depending on the parent structure - if it is `Add`, we do addition, if `Mult` - multiplication.
 
 *A better way to look at it is as if we were replacing the substructures by their evaluations and then evaluating the resulting structure.*
 
-For example, when evaluating a `Nat` depicted on [the diagram above](#nat_diagram), the next step of its evaluation would look as follows:
+For example, when evaluating a `Nat` depicted by [the diagram above](#nat_diagram), the next step of its evaluation would look as follows:
 
 ```graphviz
 digraph G { label="Structure" rankdir=LR
@@ -209,11 +209,11 @@ digraph G { label="Structure" rankdir=TB newrank=true
 
 This is an `Add[Int](expr1 = 6, expr2 = 3)`, and the next step is to collapse it by doing `6 + 3`.
 
-We are dealing with the **structure preserving transformations** here. Probably you have already recognized how the above job can easily be done with functors.
+We are dealing with a **structure-preserving transformation** here. Probably you have already recognized how the above job can be easily done with functors.
 
-If we redefine our recursive structures so that they are parameterized by the type of their substructure, their types will have a form `F[A]` and we will be able to define functor instances for them.
+If we redefine our recursive structures such that they are parameterized by the type of their substructure, their types will have a form `F[A]` and we will be able to define functor instances for them.
 
-Ordinarily `A` in these `F[A]` is another `F[_]` - a substructure, reflecting the recursive nature of the parent structure. In our examples, we first do a `map`, turning `F[A]` into `F[B]`, where `B` is the type we are evaluating the structure into (in all our examples, `B` is `Int`). Next, given `F[B]`, we collapse it into a `B`. A function `F[B] => B` is called an *Algebra*.
+Ordinarily, `A` in these `F[A]` is another `F[_]` - a substructure, reflecting the recursive nature of the parent structure. In our examples, we first do a `map`, turning `F[A]` into `F[B]`, where `B` is the type we are evaluating the structure into (in all our examples, `B` is `Int`). Next, given `F[B]`, we collapse it into a `B`. A function `F[B] => B` is called an *Algebra*.
 
 Now let us see how this theory can be applied in practice.
 
@@ -241,13 +241,13 @@ There is one problem with this code, however. In a recursive structure, `T` is s
 
 [^2]: [http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125)
 
-## Fixed point types
+## Fixed-point types
 ### Theory
-A [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of a function `f(_)` is a value `x` such that `f(x) == x`. We can think of a higher-order function `fix` that computes a fixed point of its argument: `fix(f) == x` such that `f(x) == x`. Or, in other words, `fix(f) == f(fix(f))`.
+A [fixed point](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of a function `f(_)` is a value `x` such that `f(x) == x`. We can think of a higher-order function `fix` that computes a fixed point of its argument: `fix(f) == x` such that `f(x) == x`. By extension, `fix(f) == f(fix(f))` holds.
 
-What if we bring the same ideas to the type theory? By analogy, a *fixed point type* of a higher-kinded type `F[_]` is some type `T` such that `F[T] == T` - precisely what we need. We can also have a type `Fix[_[_]]`, such that `Fix[F] == F[Fix[F]]`.
+What if we bring the same ideas to the type theory? By analogy, a *fixed-point type* of a higher-kinded type `F[_]` is some type `T` such that `F[T] == T` - precisely what we need. We can also have a type `Fix[F[_]]`, such that `Fix[F] == F[Fix[F]]`.
 
-Fixed point types are interesting, because they can represent a recursive structure of any desired depth as a single type:
+Fixed-point types are interesting, because they can represent a recursive structure of any desired depth as a single type:
 
 ```scala
 Fix[F] == F[Fix[F]] == F[F[Fix[F]]] == ...
@@ -258,7 +258,7 @@ I am not aware of a way you can define `Fix[_[_]]` so that the above equality ho
 
 It is possible to think of a workaround, though. In our `cata` definition above, we need to know that `F[T] == T` so that we can treat `T` as if it was `F[T]`. So in practice, we do not need to convince the compiler in that equality - a simple function `T => F[T]` is enough.
 
-We can emulate the fixed point type computation as in the theory above as follows:
+We can emulate the fixed-point type computation as in the theory above as follows:
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C2Generalisation.scala" snippet="Fix"}
 ```
@@ -266,7 +266,7 @@ We can emulate the fixed point type computation as in the theory above as follow
 So we just wrap an `F[_]` in this case class. `Fix[F] => F[Fix[F]]` can be defined as simply `fix => fix.unfix`.
 
 ## Catamorphism: second attempt
-Now we can define the catamorphism on a fixed point type of a structure `F` as follows:
+Now we can define the catamorphism on a fixed-point type of a structure `F` as follows:
 
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C2Generalisation.scala" snippet="CataRight"}
 ```
@@ -277,14 +277,14 @@ Now we can use the new `cata` to define our examples:
 ```{.scala include="code/matryoshka-intro/src/main/scala/matryoshkaintro/C2Generalisation.scala" snippet="Examples"}
 ```
 
-First thing that catches the eye, probably, is how we need to embed every layer of the recursive structures into `Fix`. This is ugly, but fine as for the proof of concept.
+First thing that catches the eye, probably, is how we need to embed every layer of the recursive structures into `Fix`. This is cumbersome, but fine as for the proof of concept.
 
 Notice how all of the examples are now expressed in terms of one function - `cata`. We have successfully abstracted the common parts of the recursive structure collapse task.
 
 Also, notice how we have gotten rid of the recursive calls in all of our examples. The recursion is now abstracted away in `cata`, so that the user does not need to deal with it directly.
 
 # Matryoshka
-Catamorphism is not the only recursion scheme out there. Many more exist. And, of course, you do not need to implement them from scratch. [Matryoshka](https://github.com/slamdata/matryoshka) is a library that specializes on implementing recursion schemes on fixed point types of  recursive structures.
+Catamorphisms are not the only recursion scheme out there. Many more exist. And, of course, you do not need to implement them from scratch. [Matryoshka](https://github.com/slamdata/matryoshka) is a library that specializes on implementing recursion schemes on fixed-point types of  recursive structures.
 
 ## Recursion scheme mechanics
 ```{.plantuml width=100%}
@@ -332,14 +332,14 @@ class Birecursive <<O,green>> {
 }
 ```
 
-The library is centered at the notion of the fixed point types. On the diagram above, the core type classes are marked with blue "T", and their companion objects - with green "O". These type classes describe what it means for an arbitrary type `T` to be a fixed point type.
+The library is centered around the notion of the fixed-point types. In the diagram above, the core type classes are marked with blue "T", and their companion objects - with green "O". These type classes describe what it means for an arbitrary type `T` to be a fixed-point type.
 
-`Based[T]` type class captures the idea that a type `T` must "know" the type `Base[_]`, for which (supposedly) `Base[T] == T`. Supposedly, since there's nothing in `Based` whatsoever to suggest that equality.
+The `Based[T]` type class captures the idea that a type `T` must "know" the type `Base[_]`, for which (supposedly) `Base[T] == T`. Supposedly, since there's nothing in `Based` whatsoever to suggest that equality.
 
 ### Recursive - to tear structures down
 `Recursive[T]` has a single abstract method, `project`, and a whole lot of methods specifying various schemes of recursion you can run on `T`. Our `cata` is among them. But obviously `project` is of the most interest, since it is the only abstract method and hence its implementation sheds light on what it means for a type `T` to be `Recursive`.
 
-`project` can be interpreted as `T => Base[T]`. In the section on the fixed point type [practical application](#practice), we already discussed that it is crucial to be able to extract the type `F[T]` from its fixed point representation `T`. **If `T` is `Recursive` you can extract `F[T]` from `T`**, where `F` is the higher-kinded type `T` is a fixed point of. You can specify this `F` via a type in the companion object of `Recursive` - `Recursive.Aux[T, F[_]]`.
+`project` can be interpreted as `T => Base[T]`. In the section on [practical applications](#practice) of the fixed-point type we already discussed that it is crucial to be able to extract the type `F[T]` from its fixed point representation `T`. **If `T` is `Recursive` you can extract `F[T]` from `T`**, where `F` is the higher-kinded type `T` is a fixed point of. You can specify this `F` via a type in the companion object of `Recursive` - `Recursive.Aux[T, F[_]]`.
 
 The fact that you can extract `F[T]` from `T` is a necessary condition for the recursion schemes defined in the `Recursive[T]` type class. They have one thing in common: they all **tear down a recursive structure**. Here is an intuition for this:
 
@@ -394,13 +394,13 @@ An example of a recursion scheme that takes an advantage of such a capability is
 ## Examples revisited
 Let us now see how to rewrite our examples from the previous chapters using Matryoshka.
 
-First of all, **make sure you apply [SI2712 Fix](https://github.com/milessabin/si2712fix-plugin)**, or else implicits won't resolve correctly and this will spoil you all the fun.
+First of all, **make sure you apply [SI-2712 fix](https://github.com/milessabin/si2712fix-plugin)**, or else implicits won't resolve correctly and this will spoil you all the fun.
 
 Next, do some Matryoshka imports:
 
 ```scala
 import matryoshka.{ Recursive, Corecursive }
-import matryoshka.data.Fix  // The fixed point type similar to the one we implemented ad-hoc, but with Recursive and Corecursive instances.
+import matryoshka.data.Fix  // The fixed-point type similar to the one we implemented ad-hoc, but with Recursive and Corecursive instances.
 import matryoshka.implicits._  // Syntax
 ```
 
@@ -418,6 +418,6 @@ Main differences from our [ad-hoc solution](#examples-using-cata):
 # Conclusion
 Whenever you use recursion in your code, chances are that what you do is already abstracted in one of the recursion schemes. The benefit from using them instead of bare recursion is similar to the benefit when using `for` or `while` instead of `goto` - more concise, readable and secure code.
 
-Matryoshka is an awesome framework that does a great job introducing someone to these concepts. It has one rather significant drawback, however - at the moment, it is not stack safe. For larger structures, this becomes a problem.
+Matryoshka is an framework that does a great job introducing someone to these concepts. It has one rather significant drawback, however - at the moment, it is not stack-safe. For larger structures, this becomes a problem.
 
 Nevertheless, in my opinion, every programmer aspiring to perfect their craft would benefit greatly from trying to solve their everyday recursive tasks in a more "literate" way Matryoshka offers.
