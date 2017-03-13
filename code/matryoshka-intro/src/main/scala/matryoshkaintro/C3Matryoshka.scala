@@ -19,7 +19,7 @@ object C3Matryoshka extends App with C2Defs {
         ).embed
       ).embed
     ).embed
-  val natRes: Int = natToInt( nat[Fix[Nat]] )
+  val natRes = natToInt(nat[Fix[Nat]])
   println(natRes)  // 3
 
   // Sum a list of ints
@@ -35,7 +35,7 @@ object C3Matryoshka extends App with C2Defs {
         ).embed
       ).embed
     ).embed
-  val listRes: Int = sumList( lst[Fix[IntList]] )
+  val listRes = sumList(lst[Fix[IntList]])
   println(listRes)  // 6
 
   // Evaluate an expression
@@ -52,7 +52,7 @@ object C3Matryoshka extends App with C2Defs {
       ).embed,
       Num(3).embed
     ).embed
-  val exprRes: Int = eval( expr[Fix[Expr]] )
+  val exprRes = eval(expr[Fix[Expr]])
   println(exprRes)  // 9
   // end snippet Examples
 }

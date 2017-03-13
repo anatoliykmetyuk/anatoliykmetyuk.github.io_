@@ -17,7 +17,7 @@ object C2Generalisation extends App with C2Defs with C2Cata {
         ))
       ))
     ))
-  val natRes: Int = natToInt( nat )
+  val natRes = natToInt(nat)
   println(natRes)  // 3
 
   // Sum a list of ints
@@ -33,7 +33,7 @@ object C2Generalisation extends App with C2Defs with C2Cata {
         ))
       ))
     ))
-  val listRes: Int = sumList( lst )
+  val listRes = sumList(lst)
   println(listRes)  // 6
 
   // Evaluate an expression
@@ -50,7 +50,7 @@ object C2Generalisation extends App with C2Defs with C2Cata {
       )),
       Fix[Expr](Num(3))
     ))
-  val exprRes: Int = eval( expr )
+  val exprRes = eval(expr)
   println(exprRes)  // 9
   // end snippet Examples
 }
@@ -92,9 +92,9 @@ trait C2Defs {
 
   implicit val exprFunct: Functor[Expr] = new Functor[Expr] {
     def map[A, B](fa: Expr[A])(f: A => B): Expr[B] = fa match {
-      case Add  (x1, x2) => Add (f(x1), f(x2))
-      case Mult (x1, x2) => Mult(f(x1), f(x2))
-      case x@Num(_     ) => x
+      case     Add (x1, x2) => Add (f(x1), f(x2))
+      case     Mult(x1, x2) => Mult(f(x1), f(x2))
+      case x @ Num (_     ) => x
     }
   }
   // end snippet Functors
@@ -116,6 +116,6 @@ trait C2Cata {
   // start snippet CataRight
   // Catamorphism
   def cata[F[_]: Functor, A](structure: Fix[F])(algebra: F[A] => A): A =
-    algebra( structure.unfix.map(cata(_)(algebra)) )
+    algebra(structure.unfix.map(cata(_)(algebra)))
   // end snippet CataRight
 }
