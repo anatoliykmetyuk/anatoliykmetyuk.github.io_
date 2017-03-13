@@ -31,7 +31,7 @@ object C1NonDry extends App with C1Defs {
     case Num (x)      => x
   }
   val expr = Add(Mult(Num(2), Num(3)), Num(3))
-  val exprRes = eval(expr)
+  val exprRes: Int = eval(expr)
   println(exprRes)  // 9
   // end snippet ExprEx
 }

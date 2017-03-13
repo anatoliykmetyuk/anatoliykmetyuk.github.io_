@@ -29,14 +29,14 @@ Here is how an implementation of natural numbers might look like:
 And here is a visualization of the number 3 represented this way:
 
 ```{.graphviz width=100% #nat_diagram}
-digraph G { label="Structure" rankdir=LR
-  S3 [label="Succ"]
+digraph G { label=" Structure " rankdir=LR
+  S3 [label=" Succ "]
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
-    S2 [label="Succ"]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
+    S2 [label=" Succ "]
 
     subgraph cluster2 {
-      S1 [label="Succ"]
+      S1 [label=" Succ "]
       
       subgraph cluster3 {
         "Zero"
@@ -44,7 +44,7 @@ digraph G { label="Structure" rankdir=LR
     }
   }
 
-  S3 -> S2 -> S1 -> Zero [label="previous"]
+  S3 -> S2 -> S1 -> Zero [label=" previous "]
 } 
 ```
 
@@ -66,27 +66,27 @@ A list is either an empty list or a recursive structure that has a `head` elemen
 Here is how a list of `1, 2, 3` looks like:
 
 ```{.graphviz #list_diagram}
-digraph G { label="Structure" rankdir=TB newrank=true
+digraph G { label=" Structure " rankdir=TB newrank=true
 
-  N3 [label="Cons"]
-  L3 [label="1"]
+  N3 [label=" Cons "]
+  L3 [label=" 1 "]
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
-    N2 [label="Cons"]
-    L2 [label="2"]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
+    N2 [label=" Cons "]
+    L2 [label=" 2 "]
     subgraph cluster2 {
-      N1 [label="Cons"]
-      L1 [label="3"]
+      N1 [label=" Cons "]
+      L1 [label=" 3 "]
       subgraph cluster3 { Empty }
     }
   }
   {rank=same Empty N1 N2 N3}
 
-  N3 -> N2 -> N1 -> Empty [label="tail"]
+  N3 -> N2 -> N1 -> Empty [label="tail "]
 
-  N3 -> L3 [label="head"]
-  N2 -> L2 [label="head"]
-  N1 -> L1 [label="head"]
+  N3 -> L3 [label=" head"]
+  N2 -> L2 [label=" head"]
+  N1 -> L1 [label=" head"]
 }
 ```
 
@@ -106,28 +106,28 @@ We have two node types for the summation and the multiplication, and one leaf ty
 Here is how an expression `2 * 3 + 3` looks like:
 
 ```{.graphviz #expr_diagram}
-digraph G { label="Structure" rankdir=TB newrank=true
+digraph G { label=" Structure " rankdir=TB newrank=true
   Add
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
     Mult
-    subgraph cluster3 { Num1[label="Num"] Lit1[label="2"] }
-    subgraph cluster4 { Num2[label="Num"] Lit2[label="3"] } 
+    subgraph cluster3 { Num1[label=" Num "] Lit1[label=" 2 "] }
+    subgraph cluster4 { Num2[label=" Num "] Lit2[label=" 3 "] } 
   }
 
-  subgraph cluster2 { label="Substructure" Num3[label="Num"] Lit3[label="3"] }
+  subgraph cluster2 { label=" Substructure " Num3[label=" Num "] Lit3[label=" 3 "] }
 
   {rank=same Mult Num3}
 
-  Add -> Mult[label="expr1"]
-  Add -> Num3[label="expr2"]
+  Add -> Mult[label=" expr1 "]
+  Add -> Num3[label=" expr2 "]
 
-  Mult -> Num1[label="expr1"]
-  Mult -> Num2[label="expr2"]
+  Mult -> Num1[label=" expr1 "]
+  Mult -> Num2[label=" expr2 "]
 
-  Num1 -> Lit1[label="literal"]
-  Num2 -> Lit2[label="literal"]
-  Num3 -> Lit3[label="literal"]
+  Num1 -> Lit1[label=" literal "]
+  Num2 -> Lit2[label=" literal "]
+  Num3 -> Lit3[label=" literal "]
 }
 ```
 
@@ -151,14 +151,14 @@ Intuitively, every example above is similar. All of them involve a recursive str
 For example, when evaluating a `Nat` depicted by [the diagram above](#nat_diagram), the next step of its evaluation would look as follows:
 
 ```graphviz
-digraph G { label="Structure" rankdir=LR
-  S3 [label="Succ"]
+digraph G { label=" Structure " rankdir=LR
+  S3 [label=" Succ "]
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
-    S2 [label="2"]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
+    S2 [label=" 2 "]
   }
 
-  S3 -> S2[label="previous"]
+  S3 -> S2[label=" previous "]
 } 
 ```
 
@@ -167,19 +167,19 @@ Effectively, we have `Succ(previous = 2)`, which is then collapsed into `1 + 2` 
 Similarly, the next step for the `IntList` [depicted](#list_diagram) above will be:
 
 ```graphviz
-digraph G { label="Structure" rankdir=TB newrank=true
+digraph G { label=" Structure " rankdir=TB newrank=true
 
-  N3 [label="Cons"]
-  L3 [label="1"]
+  N3 [label=" Cons "]
+  L3 [label=" 1 "]
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
-    N2 [label="5"]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
+    N2 [label=" 5 "]
   }
   {rank=same N2 N3}
 
-  N3 -> N2 [label="tail"]
+  N3 -> N2 [label=" tail "]
 
-  N3 -> L3 [label="head"]
+  N3 -> L3 [label=" head "]
 }
 ```
 
@@ -189,21 +189,21 @@ Finally, for the `Expr` [above](#expr_diagram), the next step is to evaluate bot
 
 
 ```graphviz
-digraph G { label="Structure" rankdir=TB newrank=true
+digraph G { label=" Structure " rankdir=TB newrank=true
   Add
 
-  subgraph cluster1 { label="Substructure" graph[style=solid]
-    Mult[label="6"]
+  subgraph cluster1 { label=" Substructure " graph[style=solid]
+    Mult[label=" 6 "]
   }
 
-  subgraph cluster2 { label="Substructure"
-    Num3[label="3"]
+  subgraph cluster2 { label=" Substructure "
+    Num3[label=" 3 "]
   }
 
   {rank=same Mult Num3}
 
-  Add -> Mult[label="expr1"]
-  Add -> Num3[label="expr2"]
+  Add -> Mult[label=" expr1 "]
+  Add -> Num3[label=" expr2 "]
 }
 ```
 
@@ -347,13 +347,13 @@ The fact that you can extract `F[T]` from `T` is a necessary condition for the r
 digraph G { rankdir=TB newrank=true
 
   subgraph cluster1 { label="Before 'project'" graph[style=solid]
-    T1[label="T"]
+    T1[label=" T "]
   }
 
   FT[label="F[T]"]
 
   subgraph cluster2 { label="After 'project'"
-    T2[label="T"]
+    T2[label=" T "]
   }
 
   {rank=same T1 T2}
@@ -376,11 +376,11 @@ digraph G { rankdir=TB newrank=true
   FT[label="F[T]"]
 
   subgraph cluster1 { label="Before 'embed'" graph[style=solid]
-    T1[label="T"]
+    T1[label=" T "]
   }
 
   subgraph cluster2 { label="After 'embed'"
-    T2[label="T"]
+    T2[label=" T "]
   }
 
   {rank=same T1 T2}
