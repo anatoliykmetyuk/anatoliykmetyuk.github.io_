@@ -140,13 +140,13 @@ How do we evaluate it? If it is a node representing a mathematical operation, fi
 ## Structure preserving transformations
 Intuitively, every example above is similar. All of them involve a recursive structure that is collapsed from the "bottom" (the terminal element with no child substructures) to the "top" (the root structure). What is in common between the `natToInt`, `sumList` and `eval` functions? Can we abstract away these common elements, so that every one of these functions can be expressed in the same terms?
 
-- Every example works on a **recursive structure - a structure that has substructures** of the same type as parts of itself.
-- They all involve **recursive calls in order to transform these substructures**. So, `natToInt` is called recursively on `previous` in order to evaluate `Succ(previous)`.
-- **The results** of these transformations **are combined according to the parent structure**.
+- Every example works on a recursive structure - a structure that has substructures of the same type as parts of itself.
+- They all involve recursive calls in order to transform these substructures. So, `natToInt` is called recursively on `previous` in order to evaluate `Succ(previous)`.
+- The results of these transformations are combined according to the parent structure.
     - In `sumList(Cons(head, tail))`, `head` is a part of the parent structure. `tail` is a substructure that is evaluated recursively via `sumList(tail)` and then combined with that `head` via addition.
     - In `eval` of either `Add` or `Mult`, we first need to call `eval` on the child expressions of these nodes, and then combine them depending on the parent structure - if it is `Add`, we do addition, if `Mult` - multiplication.
 
-*A better way to look at it is as if we were replacing the substructures by their evaluations and then evaluating the resulting structure.*
+A better way to look at it is as if we were replacing the substructures by their evaluations and then evaluating the resulting structure.
 
 For example, when evaluating a `Nat` depicted by [the diagram above](#nat_diagram), the next step of its evaluation would look as follows:
 
@@ -162,7 +162,7 @@ digraph G { label=" Structure " rankdir=LR
 } 
 ```
 
-Effectively, we have `Succ(previous = 2)`, which is then collapsed into `1 + 2` == `3`. However, `previous` is supposed to be a `Nat`, not an `Int`. In order to be able to write the above statement, we can **allow the substructure to have an arbitrary type**: `Succ[A](previous: A)`.
+Effectively, we have `Succ(previous = 2)`, which is then collapsed into `1 + 2` == `3`. However, `previous` is supposed to be a `Nat`, not an `Int`. In order to be able to write the above statement, we can allow the substructure to have an arbitrary type: `Succ[A](previous: A)`.
 
 Similarly, the next step for the `IntList` [depicted](#list_diagram) above will be:
 
@@ -209,7 +209,7 @@ digraph G { label=" Structure " rankdir=TB newrank=true
 
 This is an `Add[Int](expr1 = 6, expr2 = 3)`, and the next step is to collapse it by doing `6 + 3`.
 
-We are dealing with a **structure-preserving transformation** here. Probably you have already recognized how the above job can be easily done with functors.
+We are dealing with a *structure-preserving transformation* here. Probably you have already recognized how the above job can be easily done with functors.
 
 If we redefine our recursive structures such that they are parameterized by the type of their substructure, their types will have a form `F[A]` and we will be able to define functor instances for them.
 
@@ -254,7 +254,7 @@ Fix[F] == F[Fix[F]] == F[F[Fix[F]]] == ...
 ```
 
 ### Practice
-I am not aware of a way you can define `Fix[_[_]]` so that the above equality holds - the compiler will think `F[T] != T` for any `F` and `T`, as far as I know.
+I am not aware of a way you can define `Fix[F[_]]` so that the above equality holds - the compiler will think `F[T] != T` for any `F` and `T`, as far as I know.
 
 It is possible to think of a workaround, though. In our `cata` definition above, we need to know that `F[T] == T` so that we can treat `T` as if it was `F[T]`. So in practice, we do not need to convince the compiler in that equality - a simple function `T => F[T]` is enough.
 
@@ -339,9 +339,9 @@ The `Based[T]` type class captures the idea that a type `T` must "know" the type
 ### Recursive - to tear structures down
 `Recursive[T]` has a single abstract method, `project`, and a whole lot of methods specifying various schemes of recursion you can run on `T`. Our `cata` is among them. But obviously `project` is of the most interest, since it is the only abstract method and hence its implementation sheds light on what it means for a type `T` to be `Recursive`.
 
-`project` can be interpreted as `T => Base[T]`. In the section on [practical applications](#practice) of the fixed-point type we already discussed that it is crucial to be able to extract the type `F[T]` from its fixed point representation `T`. **If `T` is `Recursive` you can extract `F[T]` from `T`**, where `F` is the higher-kinded type `T` is a fixed point of. You can specify this `F` via a type in the companion object of `Recursive` - `Recursive.Aux[T, F[_]]`.
+`project` can be interpreted as `T => Base[T]`. In the section on [practical applications](#practice) of the fixed-point type we already discussed that it is crucial to be able to extract the type `F[T]` from its fixed point representation `T`. If `T` is `Recursive` you can extract `F[T]` from `T`, where `F` is the higher-kinded type `T` is a fixed point of. You can specify this `F` via a type in the companion object of `Recursive` - `Recursive.Aux[T, F[_]]`.
 
-The fact that you can extract `F[T]` from `T` is a necessary condition for the recursion schemes defined in the `Recursive[T]` type class. They have one thing in common: they all **tear down a recursive structure**. Here is an intuition for this:
+The fact that you can extract `F[T]` from `T` is a necessary condition for the recursion schemes defined in the `Recursive[T]` type class. They have one thing in common: they all tear down a recursive structure. Here is an intuition for this:
 
 ```graphviz
 digraph G { rankdir=TB newrank=true
@@ -364,7 +364,7 @@ digraph G { rankdir=TB newrank=true
 
 `project` is a "taker" - it is capable of *extracting* information from `T`. Naturally, if you take *something* from `T`, there becomes less of that *something* in `T`. This way, you can "pump" the structure, layer by layer, from `T`, and do whatever you want with it, until there is nothing left in `T`.
 
-*The arrow on the diagram points from `F[T]` towards `T` to indicate that `T` is a member of the structure `F[T]`. It does not indicate a direction of the information flow ("who takes from whom") in the `project` application.*
+The arrow on the diagram points from `F[T]` towards `T` to indicate that `T` is a member of the structure `F[T]`. It does not indicate a direction of the information flow ("who takes from whom") in the `project` application.
 
 ### Corecursive - to build structures up
 It follows from the name that `Corecursive` is a dual of `Recursive` - hence, it must do the opposite thing to what `Recursive` does.
@@ -394,7 +394,7 @@ An example of a recursion scheme that takes an advantage of such a capability is
 ## Examples revisited
 Let us now see how to rewrite our examples from the previous chapters using Matryoshka.
 
-First of all, **make sure you apply [SI-2712 fix](https://github.com/milessabin/si2712fix-plugin)**, or else implicits won't resolve correctly and this will spoil you all the fun.
+First of all, *make sure you apply [SI-2712 fix](https://github.com/milessabin/si2712fix-plugin)*, or else implicits won't resolve correctly and this will spoil you all the fun.
 
 Next, do some Matryoshka imports:
 
