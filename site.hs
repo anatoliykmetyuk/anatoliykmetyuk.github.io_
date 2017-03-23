@@ -38,11 +38,11 @@ main = hakyll $ do
         >>= loadAndApplyTemplate "templates/index.html"   indexCtx
         >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
-  match "posts/*" $ do
+  ["posts/*", "pages/*"] `forM_` \f -> match f $ do
     route $ setExtension "html"
     compile $
           (pandocCompilerWithTransformM readerOpts writerOpts $
-            codeInclude >=> graphvizFilter >=> plantumlFilter)
+            codeInclude >=> graphvizFilter >=> plantumlFilter >=> htmlFilter)
 
       >>= saveSnapshot "content"
       >>= loadAndApplyTemplate "templates/post.html"    postCtx
@@ -143,6 +143,7 @@ pyPandocPlugin str = scriptFilter $ "./plugins/pandocfilters/examples/" ++ str +
 
 graphvizFilter = pyPandocPlugin "graphviz"
 plantumlFilter = pyPandocPlugin "plantuml"
+htmlFilter     = pyPandocPlugin "html"
 codeInclude    = scriptFilter   "./plugins/pandoc-include-code/dist/build/pandoc-include-code/pandoc-include-code"
 
 
