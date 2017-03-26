@@ -7,7 +7,7 @@ Hello,
 
 It is my pleasure to invite you to a free webinar of mine where I am going to introduce type classes and some basic usage of them in purely functional libraries.
 
-The webinar will take place on **April 3rd, 3 PM UTC**.
+The webinar will take place on **Sunday, April 2nd, 3 PM UTC**.
 
 The content covered will include:
 
