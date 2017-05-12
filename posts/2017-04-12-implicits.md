@@ -16,7 +16,7 @@ There are three things Scala implicits mechanism is good for:
 
 **Dependency injection** is needed in the majority of large applications to glue their modules together. In Java, people use Spring Framework for this, and in Scala the Pie pattern or injection via constructor parameters are popular. One way to think about the implicits is a language-level support for dependency injection. Whenever we define something that relies on something else, we can declare this dependency via implicits.
 
-This may not look like much at a glance. But the implicits mechanism powers a whole programming style oriented on purely functional and [type level](TODO) programming based on [category theory](TODO).
+This may not look like much at a glance. But the implicits mechanism powers a whole programming style oriented on purely functional and type level programming based on category theory.
 
 This article explains the Scala implicits and these three ways to make use of them.
 
@@ -111,7 +111,7 @@ In our example, the rich wrappers depend on the database access object. Let us s
 ```{.scala include="code/implicits/src/main/scala/implicitconversions/Main.scala" snippet="MongoDB"}
 ```
 
-Then, whenever we want to change the backend we use, we will need to change every occurrence of it in the code. That's not very [DRY](TODO), so normally you would assign the backend you want to use to a variable and reference it every time you need the backend:
+Then, whenever we want to change the backend we use, we will need to change every occurrence of it in the code. That's not very DRY, so normally you would assign the backend you want to use to a variable and reference it every time you need the backend:
 
 ```{.scala include="code/implicits/src/main/scala/implicitconversions/Main.scala" snippet="E3_1_Force_Context_conversions"}
 ```
