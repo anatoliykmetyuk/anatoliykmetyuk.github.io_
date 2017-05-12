@@ -128,7 +128,7 @@
 <p><strong>Conversion</strong> from one type to another may be needed when a variable of one type is used where another type is expected. For example, a <code>java.lang.Integer</code> is used where <code>scala.Int</code> is expected. The conversion is straightforward, but it may be a nuisance to do that by hand. Implicit conversion from <code>Integer</code> to <code>Int</code> (and vice versa) enables you to use one when the other is expected and have the compiler to do the conversion automatically.</p>
 <p><strong>Method injection</strong> allows you to inject and subsequently call a method on a class that does not have this method defined or inherited. The “injection” is meant in a metaphorical sense - the class definitions are not modified. For example, in Scala you can call the collections methods (<code>map</code>, <code>flatMap</code> etc) on a <code>java.lang.String</code>, which does not define them.</p>
 <p><strong>Dependency injection</strong> is needed in the majority of large applications to glue their modules together. In Java, people use Spring Framework for this, and in Scala the Pie pattern or injection via constructor parameters are popular. One way to think about the implicits is a language-level support for dependency injection. Whenever we define something that relies on something else, we can declare this dependency via implicits.</p>
-<p>This may not look like much at a glance. But the implicits mechanism powers a whole programming style oriented on purely functional and <a href="TODO">type level</a> programming based on <a href="TODO">category theory</a>.</p>
+<p>This may not look like much at a glance. But the implicits mechanism powers a whole programming style oriented on purely functional and type level programming based on category theory.</p>
 <p>This article explains the Scala implicits and these three ways to make use of them.</p>
 <h1 id="example">Example</h1>
 <p>The best way to understand a concept is to see its concrete application.</p>
@@ -240,7 +240,7 @@ u.<span class="fu">write</span>()
 <h2 id="example-2">Example</h2>
 <p>In our example, the rich wrappers depend on the database access object. Let us see what happens if we want to support multiple database backends - for instance, a MongoDB backend:</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">object</span> UserDBMongo <span class="kw">extends</span> <span class="fu">DummyUserDB</span>(<span class="st">&quot;MongoDB&quot;</span>)</code></pre></div>
-<p>Then, whenever we want to change the backend we use, we will need to change every occurrence of it in the code. That’s not very <a href="TODO">DRY</a>, so normally you would assign the backend you want to use to a variable and reference it every time you need the backend:</p>
+<p>Then, whenever we want to change the backend we use, we will need to change every occurrence of it in the code. That’s not very DRY, so normally you would assign the backend you want to use to a variable and reference it every time you need the backend:</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> db = UserDBMongo
 
 <span class="kw">class</span> <span class="fu">RichUser</span>(u: User) {
