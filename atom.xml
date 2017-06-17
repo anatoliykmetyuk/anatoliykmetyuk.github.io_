@@ -8,8 +8,16 @@
         <name>Anatolii Kmetiuk</name>
         <email>anatoliykmetyuk@gmail.com</email>
     </author>
-    <updated>2017-05-12T00:00:00Z</updated>
+    <updated>2017-06-17T00:00:00Z</updated>
     <entry>
+    <title>Why CRUD Applications are hard?</title>
+    <link href="http://akmetiuk.com/posts/2017-06-17-crud-apps.html" />
+    <id>http://akmetiuk.com/posts/2017-06-17-crud-apps.html</id>
+    <published>2017-06-17T00:00:00Z</published>
+    <updated>2017-06-17T00:00:00Z</updated>
+    <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
+</entry>
+<entry>
     <title>Implicits mechanism in Scala</title>
     <link href="http://akmetiuk.com/posts/2017-05-12-implicits.html" />
     <id>http://akmetiuk.com/posts/2017-05-12-implicits.html</id>
@@ -79,14 +87,6 @@
     <id>http://akmetiuk.com/posts/2016-08-10-splitting-monolitic-commits.html</id>
     <published>2016-08-10T00:00:00Z</published>
     <updated>2016-08-10T00:00:00Z</updated>
-    <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
-</entry>
-<entry>
-    <title>Thread safety of SubScript values (and other scoped references)</title>
-    <link href="http://akmetiuk.com/posts/2016-04-13-subscript-values-in-by-name-calls.html" />
-    <id>http://akmetiuk.com/posts/2016-04-13-subscript-values-in-by-name-calls.html</id>
-    <published>2016-04-13T00:00:00Z</published>
-    <updated>2016-04-13T00:00:00Z</updated>
     <summary type="html"><![CDATA[The blog of Anatolii Kmetiuk]]></summary>
 </entry>
 
