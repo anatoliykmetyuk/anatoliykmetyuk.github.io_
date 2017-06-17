@@ -134,7 +134,7 @@
 <p>The best way to understand a concept is to see its concrete application.</p>
 <p>Consider a web application in Scala. Its job is to maintain a database of users and expose them as a JSON API. A user has an <code>Int</code> ID and a <code>String</code> name. Let us see how implicits can come handy in this scenario.</p>
 <h2 id="architecture">Architecture</h2>
-<p>A natural way to model users is to define a <code>User</code> case class. Next, we need a way to perform read/write operations on a database of users. Finally, withing our web framework we want to register an HTTP request handler to expose the JSON API to the users.</p>
+<p>A natural way to model users is to define a <code>User</code> case class. Next, we need a way to perform read/write operations on a database of users. Finally, within our web framework we want to register an HTTP request handler to expose the JSON API to the users.</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">type</span> Json = Map[String, String]
 <span class="kw">type</span> ApiHandler = PartialFunction[String, Json]
 
@@ -167,7 +167,7 @@
 <li><code>UserDBSql</code> pretends to use a SQL database as a backend.</li>
 </ul>
 <h2 id="execution">Execution</h2>
-<p>With that architecture, in order to expose the API, we need to register a handler for the HTTP path of that API withing the web framework using the <code>serve</code> method.</p>
+<p>With that architecture, in order to expose the API, we need to register a handler for the HTTP path of that API within the web framework using the <code>serve</code> method.</p>
 <div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">def</span> <span class="fu">userToJson</span>(u: User): Json =
   Map(<span class="st">&quot;id&quot;</span> -&gt; u.<span class="fu">id</span>.<span class="fu">toString</span>, <span class="st">&quot;username&quot;</span> -&gt; u.<span class="fu">username</span>)
 
