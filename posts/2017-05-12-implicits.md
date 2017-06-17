@@ -26,7 +26,7 @@ The best way to understand a concept is to see its concrete application.
 Consider a web application in Scala. Its job is to maintain a database of users and expose them as a JSON API. A user has an `Int` ID and a `String` name. Let us see how implicits can come handy in this scenario.
 
 ## Architecture
-A natural way to model users is to define a `User` case class. Next, we need a way to perform read/write operations on a database of users. Finally, withing our web framework we want to register an HTTP request handler to expose the JSON API to the users.
+A natural way to model users is to define a `User` case class. Next, we need a way to perform read/write operations on a database of users. Finally, within our web framework we want to register an HTTP request handler to expose the JSON API to the users.
 
 ```{.scala include="code/implicits/src/main/scala/implicitconversions/Main.scala" snippet="Setting"}
 ```
@@ -39,7 +39,7 @@ For simplicity, we do not use any real database or web framework here, we merely
 - `UserDBSql` pretends to use a SQL database as a backend.
 
 ## Execution
-With that architecture, in order to expose the API, we need to register a handler for the HTTP path of that API withing the web framework using the `serve` method.
+With that architecture, in order to expose the API, we need to register a handler for the HTTP path of that API within the web framework using the `serve` method.
 
 ```{.scala include="code/implicits/src/main/scala/implicitconversions/Main.scala" snippet="E1_1_Force_Conversion"}
 ```
