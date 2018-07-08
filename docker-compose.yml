@@ -1,0 +1,11 @@
+version: '3'
+services:
+  akmetiuk:
+    container_name: akm
+    build: .
+    ports:
+      - 8888:8888
+    volumes:
+      - ./:/root/akmetiuk
+    stdin_open: true
+    tty: true
