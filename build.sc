@@ -8,7 +8,7 @@ import $file.post, post._
 
 import better.files._, File._, java.io.{ File => JFile }
 import cats._, cats.implicits._, io.circe._
-import thera._
+import thera._, templateFilters._
 
 
 val src      = file"src/"
@@ -18,6 +18,18 @@ implicit def fileToJava(f: File): JFile = f.toJava
 implicit val copyOptions: CopyOptions = File.CopyOptions(overwrite = true)
 implicit val openOptions: OpenOptions = List(
   java.nio.file.StandardOpenOption.CREATE)
+
+val tmlFilters = Map(
+  "post" -> cmdFilter { pandocWithOpts(List(
+    "--toc"
+  , "--webtex"
+  , "--template=../src/templates/pandoc-post.html") ++
+    pandocFilters(List(
+      "/pandoc-filters/pandocfilters/examples/graphviz.py"
+    , "/pandoc-filters/pandocfilters/examples/plantuml.py"
+    , "/pandoc-filters/include-code/include-code.py")))
+  }
+)
 
 def build = for {
   // Config
@@ -34,7 +46,7 @@ def build = for {
   // Generate posts, create index.html
   allPosts = (src/"posts").collectChildren(_.extension.contains(".md"))
     .map(Post.fromFile).toList
-  _  = compiled/"posts" createDirectory()
+  _  = compiled/"posts" createDirectoryIfNotExists()
   _ <- allPosts.traverse(processPost(_, config))
   _ <- index(allPosts, config)
 
@@ -47,7 +59,7 @@ def processPost(post: Post, globalConfig: Json): Ef[Unit] =
   for {
     postJson <- post.asJson
     config    = globalConfig.deepMerge(postJson)
-    res      <- templates(post.inFile, config)
+    res      <- templates(post.inFile, config, tmlFilters = tmlFilters)
     _         = compiled/"posts"/post.htmlName write res
   } yield ()
 
