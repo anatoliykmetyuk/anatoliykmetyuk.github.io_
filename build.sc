@@ -36,9 +36,11 @@ def build = for {
   config <- exn { yaml.parser parse (src/"data/data.yml").contentAsString }
   _       = println(s"Config parsed:\n${config}")
 
-  // Assets, code and CSS
-  _    = src/"assets" copyTo compiled/"assets"
-  _    = src/"code"   copyTo compiled/"code"
+  // Assets, code, some static files
+  _    = List("assets", "code", "CNAME", "favicon.png")
+          .foreach { f => src/f copyTo compiled/f }
+
+  // CSS
   css <- templates(src/"private-assets/css/all.css"
     , fragmentResolver = name => src/s"private-assets/css/${name}.css")
   _    = compiled/"assets/all.css" write css
