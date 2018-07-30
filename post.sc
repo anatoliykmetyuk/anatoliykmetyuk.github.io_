@@ -21,8 +21,7 @@ case class Post(inFile: File, date: Date) {
 
 
   /** WARNING: this is a config, not variables! Variables are a part of config. */
-  def localConfig: Ef[Json] =
-    templates.parseConfig(inFile.contentAsString).map(_._1)
+  def localConfig: Ef[Json] = template.parseConfig(inFile.lines)
 
   def title: Ef[String] =
     for {

@@ -8,26 +8,24 @@ import $file.post, post._
 
 import better.files._, File._, java.io.{ File => JFile }
 import cats._, cats.implicits._, io.circe._
-import thera._, templateFilters._
+import thera._
 
 
 val src      = file"src/"
 val compiled = file"_site/"
 
-implicit def fileToJava(f: File): JFile = f.toJava
 implicit val copyOptions: CopyOptions = File.CopyOptions(overwrite = true)
 implicit val openOptions: OpenOptions = List(
   java.nio.file.StandardOpenOption.CREATE)
 
 val tmlFilters = Map(
-  "post" -> cmdFilter { pandocWithOpts(List(
-    "--toc"
-  , "--webtex"
-  , "--template=../src/templates/pandoc-post.html") ++
-    pandocFilters(List(
-      "/pandoc-filters/pandocfilters/examples/graphviz.py"
-    , "/pandoc-filters/pandocfilters/examples/plantuml.py"
-    , "/pandoc-filters/include-code/include-code.py")))
+  "post" -> filter.command { """pandoc
+    --toc
+    --webtex
+    --template=../src/templates/pandoc-post.html
+    --filter /pandoc-filters/pandocfilters/examples/graphviz.py
+    --filter /pandoc-filters/pandocfilters/examples/plantuml.py
+    --filter /pandoc-filters/include-code/include-code.py"""
   }
 )
 
@@ -41,7 +39,7 @@ def build = for {
           .foreach { f => src/f copyTo compiled/f }
 
   // CSS
-  css <- templates(src/"private-assets/css/all.css"
+  css <- template(src/"private-assets/css/all.css"
     , fragmentResolver = name => src/s"private-assets/css/${name}.css")
   _    = compiled/"assets/all.css" write css
 
@@ -61,7 +59,7 @@ def processPost(post: Post, globalConfig: Json): Ef[Unit] =
   for {
     postJson <- post.asJson
     config    = globalConfig.deepMerge(postJson)
-    res      <- templates(post.inFile, config, tmlFilters = tmlFilters)
+    res      <- template(post.inFile, config, templateFilters = tmlFilters)
     _         = compiled/"posts"/post.htmlName write res
   } yield ()
 
@@ -70,7 +68,7 @@ def index(posts: List[Post], globalConfig: Json): Ef[Unit] =
     postsJsonArr <- posts.sortBy(_.date).reverse.traverse(_.asJson)
     config = globalConfig.deepMerge( Json.obj(
                 "posts" -> Json.arr(postsJsonArr: _*)) )
-    res <- templates(src/"index.html", config)
+    res <- template(src/"index.html", config)
     _    = compiled/"index.html" write res
   } yield ()
 
