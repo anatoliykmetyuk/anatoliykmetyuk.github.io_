@@ -29,16 +29,21 @@ val tmlFilters = Map(
   }
 )
 
+def log(msg: String) = att { println(msg) }
+
 def build = for {
   // Config
+  _ <- log("Reading configuration")
   config <- exn { yaml.parser parse (src/"data/data.yml").contentAsString }
-  _       = println(s"Config parsed:\n${config}")
+  // _ <- log(s"Config parsed:\n${config}")
 
   // Assets, code, some static files
+  _ <- log("Copying static assets")
   _    = List("assets", "code", "CNAME", "favicon.png")
           .foreach { f => src/f copyTo compiled/f }
 
   // CSS
+  _ <- log("Processing CSS assets")
   css <- template(src/"private-assets/css/all.css"
     , fragmentResolver = name => src/s"private-assets/css/${name}.css")
   _    = compiled/"assets/all.css" write css
@@ -46,6 +51,7 @@ def build = for {
   // Generate posts, create index.html
   allPosts = (src/"posts").collectChildren(_.extension.contains(".md"))
     .map(Post.fromFile).toList
+  _ <- log(s"Starting to process ${allPosts.length} posts...")
   _  = compiled/"posts" createDirectoryIfNotExists()
   _ <- allPosts.traverse(processPost(_, config))
   _ <- index(allPosts, config)
@@ -57,6 +63,7 @@ def build = for {
 
 def processPost(post: Post, globalConfig: Json): Ef[Unit] =
   for {
+    _        <- log(s"Processing ${post.inFile}")
     postJson <- post.asJson
     config    = globalConfig.deepMerge(postJson)
     res      <- template(post.inFile, config, templateFilters = tmlFilters)
@@ -65,6 +72,7 @@ def processPost(post: Post, globalConfig: Json): Ef[Unit] =
 
 def index(posts: List[Post], globalConfig: Json): Ef[Unit] =
   for {
+    _ <- log("Generating index.html")
     postsJsonArr <- posts.sortBy(_.date).reverse.traverse(_.asJson)
     config = globalConfig.deepMerge( Json.obj(
                 "posts" -> Json.arr(postsJsonArr: _*)) )
