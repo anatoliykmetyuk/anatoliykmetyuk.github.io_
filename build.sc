@@ -1,78 +1,63 @@
 import $ivy.`org.typelevel::cats-core:1.1.0`
 import $ivy.`org.typelevel::cats-effect:0.10.1`
-
 import $ivy.`io.circe::circe-core:0.10.0-M1`
 import $ivy.`io.circe::circe-yaml:0.8.0`
-
-import $ivy.`commons-io:commons-io:2.6`
+import $ivy.`com.github.pathikrit::better-files:3.6.0`
 import $ivy.`com.functortech::thera:0.0.1-SNAPSHOT`
+import $file.post, post._
 
-import scala.collection.JavaConverters._
-
-import java.io.File
-import java.util.Date
-import java.text.SimpleDateFormat
-import org.apache.commons.io.FileUtils
-
-import cats._, cats.implicits._
+import better.files._, File._, java.io.{ File => JFile }
+import cats._, cats.implicits._, io.circe._
 import thera._
 
-import io.circe._
 
-val srcRoot      = new File("site-src/")
-val compiledRoot = new File("_site/")
+val src      = file"src/"
+val compiled = file"_site/"
 
-val postsIn  = new File(srcRoot     , "posts/")
-val postsOut = new File(compiledRoot, "posts/")
+implicit def fileToJava(f: File): JFile = f.toJava
+implicit val copyOptions: CopyOptions = File.CopyOptions(overwrite = true)
+implicit val openOptions: OpenOptions = List(
+  java.nio.file.StandardOpenOption.CREATE)
 
-val data   = new File(srcRoot, "data/data.yml")
-val assets = new File(srcRoot, "assets"       )
-
-def build =for {
+def build = for {
   // Config
-  configRaw <- att { FileUtils.readFileToString(data, settings.enc) }
-  config    <- exn { yaml.parser.parse(configRaw) }
-  _         <- att { println(s"Config parsed:\n${config}") }
+  config <- exn { yaml.parser parse (src/"data/data.yml").contentAsString }
+  _       = println(s"Config parsed:\n${config}")
 
-  // Assemble assets
-  _   <- att { FileUtils.copyDirectory(assets, new File("_site", "assets")) }
-  css <- templates(
-    new File("site-src/private-assets/css/all.css")
-  , fragmentResolver = name => new File(s"site-src/private-assets/css/${name}.css"))
-  _   <- att { FileUtils.writeStringToFile(new File("_site/assets/all.css"), css, settings.enc) }
+  // Assets, code and CSS
+  _    = src/"assets" copyTo compiled/"assets"
+  _    = src/"code"   copyTo compiled/"code"
+  css <- templates(src/"private-assets/css/all.css"
+    , fragmentResolver = name => src/s"private-assets/css/${name}.css")
+  _    = compiled/"assets/all.css" write css
 
-  // Copy code directory
-  _ <- att { FileUtils.copyDirectory(new File("site-src/code"), new File("_site/code")) }
-
-  // Process input posts
-  allPosts <- att { readPosts(postsIn) }
+  // Generate posts, create index.html
+  allPosts = (src/"posts").collectChildren(_.extension.contains(".md"))
+    .map(Post.fromFile).toList
+  _  = compiled/"posts" createDirectory()
   _ <- allPosts.traverse(processPost(_, config))
-
+  _ <- index(allPosts, config)
 
   // Delete the code directory
-  _ <- att { FileUtils.deleteDirectory(new File("_site/code")) }
-  _ <- index(allPosts, config)
+  _  = compiled/"code" delete()
 } yield ()
-
-def readPosts(input: File): List[Post] =
-  FileUtils.iterateFiles(input, Array("md"), false)
-    .asScala.map(Post.fromFile).toList
+  
 
 def processPost(post: Post, globalConfig: Json): Ef[Unit] =
   for {
     postJson <- post.asJson
-    config   <- att { globalConfig.deepMerge(postJson) }
+    config    = globalConfig.deepMerge(postJson)
     res      <- templates(post.inFile, config)
-    _        <- att { FileUtils.writeStringToFile(new File(postsOut, post.htmlName), res, settings.enc) }
+    _         = compiled/"posts"/post.htmlName write res
   } yield ()
 
 def index(posts: List[Post], globalConfig: Json): Ef[Unit] =
   for {
     postsJsonArr <- posts.sortBy(_.date).reverse.traverse(_.asJson)
-    config <- att { globalConfig.deepMerge( Json.obj(
-                "posts" -> Json.arr(postsJsonArr: _*)) ) }
-    res    <- templates(new File(srcRoot, "index.html"), config)
-    _      <- att { FileUtils.writeStringToFile(new File(compiledRoot, "index.html"), res, settings.enc) }
+    config = globalConfig.deepMerge( Json.obj(
+                "posts" -> Json.arr(postsJsonArr: _*)) )
+    res <- templates(src/"index.html", config)
+    _    = compiled/"index.html" write res
   } yield ()
 
 run { build }
