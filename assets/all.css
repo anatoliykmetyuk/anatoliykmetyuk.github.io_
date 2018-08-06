@@ -331,6 +331,8 @@
 	.remove-bottom { margin-bottom: 0 !important; }
 	.half-bottom { margin-bottom: 10px !important; }
 	.add-bottom { margin-bottom: 20px !important; }
+
+
 /*
 * Skeleton V1.1
 * Copyright 2011, Dave Gamache
@@ -565,6 +567,8 @@
       width: 0;
       height: 0;
     }
+
+
 * {
   margin: 0;
   padding: 0;
