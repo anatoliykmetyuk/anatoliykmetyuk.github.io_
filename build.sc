@@ -3,7 +3,7 @@ import $ivy.`org.typelevel::cats-effect:0.10.1`
 import $ivy.`io.circe::circe-core:0.10.0-M1`
 import $ivy.`io.circe::circe-yaml:0.8.0`
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
-import $ivy.`com.functortech::thera:0.0.1-SNAPSHOT`
+import $ivy.`com.functortech::thera:0.0.2`
 import $file.post, post._
 
 import better.files._, File._, java.io.{ File => JFile }
