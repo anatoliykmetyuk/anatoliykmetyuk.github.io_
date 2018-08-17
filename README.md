@@ -7,4 +7,4 @@ git checkout thera
 cd src/code/<example_name>
 ```
 
-The above commands will give you a command line opened in the folder with a given example project. You can run them with `sbt run`, and you can browse the sources by opening that folder in your IDE or a text editor.
+Replace `<example_name>` with the name of the example project mentioned in the article. The above commands will give you a command line opened in the folder with a given example project. You can run them with `sbt run`, and you can browse the sources by opening that folder in your IDE or a text editor.
