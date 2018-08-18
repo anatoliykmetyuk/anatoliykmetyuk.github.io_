@@ -37,7 +37,7 @@ case class Post(inFile: File, date: Date) {
 
 object Post {
   val dateParser    = new SimpleDateFormat("yyyy-MM-dd"    )
-  val dateFormatter = new SimpleDateFormat("MMMMM dd, yyyy")
+  val dateFormatter = new SimpleDateFormat("MMM dd, yyyy")
   
   def fromFile(f: File): Post = {
     val postName = """(\d{4}-\d{2}-\d{2})-.*\.md""".r
