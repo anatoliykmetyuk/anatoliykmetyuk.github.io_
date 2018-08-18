@@ -16,7 +16,8 @@ Let us look at a problem of request handling by a web server. We need to define 
 ## Effect System for the Example
 For web servers, non-blocking execution and error reporting are essential. Therefore, we are using the following type as an effect type:
 
-To do ef
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" snippet="Ef"}
+```
 
 We are using the `EitherT` type to combine the effect types `IO` and `Either`. `Either` is implied by `EitherT`, and the latter is the monad transformer for `Either`. `IO` is responsible for asynchrony (hence non-blocking computations), and `Either` – for error reporting. In `Either`, we represent errors as `String`s under `Left`.
 
@@ -27,7 +28,9 @@ What utility methods and classes do we need in our effect system? To define them
 ## Handler Side Effects
 The signature of the handler is as follows.
 
-To do signature of request handler without the body
+```scala
+def requestHandler(requestBody: String): Ef[Unit]
+```
 
 The handler receives a JSON body and performs the following business logic steps:
 
@@ -48,9 +51,15 @@ It is necessary to define how we are going to translate each of these side effec
 # Effect Extensions
 Operating systems distinguish between different file types using extensions in the files' names - `.scala`, `.txt`, `.png` etc. Based on these extensions, an operating system knows which software to use to open the file. The file extensions technique is a formalism – a dot followed by a descriptive extension name. This formalism is used to declare the types of the files.
 
-Effect Extensions pattern applies the formalism of file extensions to translate different side effects and foreign effect types to the effect type of the application we are writing. Here is how the request handler looks under the effect extensions pattern:
+Effect Extensions pattern applies the formalism of file extensions to translate different side effects and foreign effect types to the effect type of the application we are writing. Here is how the request handler looks under the effect extensions pattern.
 
-To do a request handler body together with imports
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="requestHandler"}
+```
+
+We are using the following imports here:
+
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="imports"}
+```
 
 Every side effect and foreign effect type we have identified in the [Handler Side Effects](#handler-side-effects) subsection has its own extension. The semantics of each extension with respect to the expression it is called on is as follows:
 
@@ -66,11 +75,13 @@ How do we implement the effect extensions as a part of our effect system?
 ## Strategy
 We are using the Rich Wrapper pattern to inject effect extensions into the expression types we want to use these extensions on.
 
-To do, Which rapperS for either and delayed
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" snippet="RichWrappers" ignore-other-snippets="true"}
+```
 
 We also define the capability to evaluate the `Ef` type synchronously.
 
-To do reach a
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" snippet="RichEf"}
+```
 
 ## Entire Pattern
 The entire pattern defines the following two components:
@@ -80,7 +91,8 @@ The entire pattern defines the following two components:
 
 We define the pattern in the package object of the application. Here is how it looks in its entirety:
 
-TODO entire pattern
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" ignore-other-snippets="true"}
+```
 
 The pattern worked for me for a broad range of applications, but for more complicated cases, you may want to improve it – see [Directions for Improvement](#directions-for-improvement) section.
 
@@ -88,34 +100,46 @@ The pattern worked for me for a broad range of applications, but for more compli
 ## Successful Run
 Let us assume that we have a file named `foo.txt` in the root of the project with the content of `"Hello World!"`. We can achieve a successful execution of the handler as follows.
 
-To do successful around
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="Successful"}
+```
 
 To do screenshot of successful on
 
 ## Failure: Circe
 We can feed a malformed JSON string to the handler to simulate a failure of the body parsing stage:
 
-To do CSS parser failed
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="CirceParserFailed"}
+```
 
-Screenshot of the above example
+To do Screenshot of the above example
 
 We can also have a correctly formatted JSON which does now have the `file` key the handler needs:
 
-To do key via example
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="CirceKeyFailed"}
+```
 
 To do key file example screenshot
 
 ## Failure: File Input
 Finally, we can simulate the failure to read a file by providing a name of a file that does not exist.
 
-To-do file failure
+```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="FileFailed"}
+```
 
 To do file for example
 
 # Previous Work
 In my previous projects, I used the pattern without rich wrappers as follows:
 
-To-do example of request handler without her the traffic's
+```scala
+for {
+  bodyJson <- etr { parse(requestBody)                   }
+  _        <- sus { println(s"Parsed body: $bodyJson")   }
+  fileName <- etr { bodyJson.hcursor.get[String]("file") }
+  fileBody <- exn { File(fileName).contentAsString       }
+  _        <- sus { println(s"Parsed file: $fileBody")   }
+} yield ()
+```
 
 I defined the effect extension methods as ordinary methods in the package object. However, the approach as in the code sample above forced me to use curly braces a lot. Usage of braces decreases the readability of code.
 
@@ -124,9 +148,11 @@ The advantage of the effect extension pattern with rich wrappers is that the for
 # Directions for Improvement
 A big brother of the rich wrapper pattern is the type class pattern. If rich wrappers are not enough for your project, consider specifying effect extensions as type classes.
 
-The motivation for placing the entire pattern into the package object is for it to be accessible from the entire application. The Cats library solves the accessibility problem by stuffing all the functionality into a single object:
+The motivation for placing the entire pattern into the package object is for it to be accessible from the entire application. The Cats library solves the accessibility problem by stuffing all the functionality into a single object. You can access all it implicits via a single import as follows:
 
-To do example of cats in places in ports Newport
+```scala
+import cats.implicits._
+```
 
 If the package object approach does not work for you, consider following in footsteps of Cats.
 In the file extension world, we have extensions that are widely recognised – `.scala`, `.png`, `.txt`. In the type class world, we have libraries of type classes like Cats or ScalaZ. Can we have a library of widely recognised effect type extensions? What problem might rise a need for such a library? Can you think of possible applications? Share your thoughts in the comments!
