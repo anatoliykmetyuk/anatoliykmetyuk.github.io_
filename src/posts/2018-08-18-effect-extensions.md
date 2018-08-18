@@ -103,22 +103,23 @@ Let us assume that we have a file named `foo.txt` in the root of the project wit
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="Successful"}
 ```
 
-To do screenshot of successful on
+The output is as follows:
+
+<a href="/assets/visuals/effect-extensions/successful-run.png"><img src="/assets/visuals/effect-extensions/successful-run.png" width="100%" target="_blank"/></a>
 
 ## Failure: Circe
 We can feed a malformed JSON string to the handler to simulate a failure of the body parsing stage:
 
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="CirceParserFailed"}
 ```
-
-To do Screenshot of the above example
+<a href="/assets/visuals/effect-extensions/circe-parser-failure.png"><img src="/assets/visuals/effect-extensions/circe-parser-failure.png" width="100%" target="_blank"/></a>
 
 We can also have a correctly formatted JSON which does now have the `file` key the handler needs:
 
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="CirceKeyFailed"}
 ```
 
-To do key file example screenshot
+<a href="/assets/visuals/effect-extensions/circe-key-failed.png"><img src="/assets/visuals/effect-extensions/circe-key-failed.png" width="100%" target="_blank"/></a>
 
 ## Failure: File Input
 Finally, we can simulate the failure to read a file by providing a name of a file that does not exist.
@@ -126,7 +127,7 @@ Finally, we can simulate the failure to read a file by providing a name of a fil
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="FileFailed"}
 ```
 
-To do file for example
+<a href="/assets/visuals/effect-extensions/file-failure.png"><img src="/assets/visuals/effect-extensions/file-failure.png" width="100%" target="_blank"/></a>
 
 # Previous Work
 In my previous projects, I used the pattern without rich wrappers as follows:
@@ -156,5 +157,4 @@ import cats.implicits._
 
 If the package object approach does not work for you, consider following in footsteps of Cats.
 In the file extension world, we have extensions that are widely recognised – `.scala`, `.png`, `.txt`. In the type class world, we have libraries of type classes like Cats or ScalaZ. Can we have a library of widely recognised effect type extensions? What problem might rise a need for such a library? Can you think of possible applications? Share your thoughts in the comments!
-
 
