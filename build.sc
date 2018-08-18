@@ -28,7 +28,7 @@ val tmlFilters = Map(
     --filter /pandoc-filters/include-code/include-code.py"""
   }
 
-, "post-template" -> filter.command { "pandoc" }
+, "raw-pandoc" -> filter.command { "pandoc" }
 )
 
 def log(msg: String) = att { println(msg) }

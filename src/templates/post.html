@@ -1,6 +1,6 @@
 ---
 template: default
-filters: [populate,post-template]
+filters: [populate,raw-pandoc]
 fragments:
   spread: spread
   comments: comments
@@ -13,13 +13,7 @@ fragments:
 </p>
 
 <h1 class="title">#{title}</h1>
-
-<div id="post">
-  #{body}
-</div>
-
 #{if example}
-<hr/>
 <div id="example-prompt">
 This article's code snippets come from a runnable  example! To run it, execute the following commands:
 
@@ -31,7 +25,11 @@ cd src/code/#{example}
 sbt run
 ```
 </div>
+<hr/>
 #{end if}
+<div id="post">
+  #{body}
+</div>
 
 #{spread}
 #{comments}
