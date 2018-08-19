@@ -9,7 +9,7 @@ RUN apt-get install -y\
   libgraphviz-dev graphviz-dev pkg-config
 RUN pip install pandocfilters pygraphviz
 
-ARG cache-18-08-18
+ARG date-18-08-19
 # Pandoc filters: plantuml, graphviz (under `pandocfilters`) and include-code
 WORKDIR /pandoc-filters
 RUN git clone https://github.com/anatoliykmetyuk/pandocfilters.git

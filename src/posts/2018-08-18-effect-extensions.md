@@ -20,7 +20,7 @@ For web servers, non-blocking execution and error reporting are essential. There
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" snippet="Ef"}
 ```
 
-We are using the `EitherT` type to combine the effect types `IO` and `Either`. `Either` is implied by `EitherT`, and the latter is the monad transformer for `Either`. `IO` is responsible for asynchrony (hence non-blocking computations), and `Either` – for error reporting. In `Either`, we represent errors as `String`s under `Left`.
+We are using the `EitherT` type to combine the effect types `IO` and `Either`. `Either` is implied by `EitherT` which is a monad transformer for `Either`. `IO` is responsible for asynchrony (hence non-blocking computations), and `Either` – for error reporting. In `Either`, we represent errors as `String`s under `Left`.
 
 We define the effect system in the package object so that it is accessible from the entire application. An *effect system* is the effect type we use and the utility methods and classes we employ to work with it throughout the code.
 
@@ -62,6 +62,16 @@ We are using the following imports here:
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="imports"}
 ```
 
+In the `requestHandler` body, the side-effecting expressions and expressions coming from third-party libraries imported above have the following types:
+
+```scala
+parse(requestBody)                  : Either[X <: io.circe.Error, io.circe.Json]  // Parses String to Json
+println(s"Parsed body: $bodyJson")  : Unit
+bodyJson.hcursor.get[String]("file"): Either[X <: io.circe.Error, String]  // Get a String under a given key from a JSON object
+File(fileName).contentAsString      : String  // Read a file as a String. May throw exceptions.
+println(s"Parsed file: $fileBody")  : Unit
+```
+
 Every side effect and foreign effect type we have identified in the [Handler Side Effects](#handler-side-effects) subsection has its own extension. The semantics of each extension with respect to the expression it is called on is as follows:
 
 1. `.etr` – lifts `Either` to `Ef`.
@@ -85,7 +95,7 @@ We also define the capability to evaluate the `Ef` type synchronously.
 ```
 
 ## Entire Pattern
-The entire pattern defines the following two components:
+The Effect Extensions pattern defines the following two components:
 
 1. An Effect Type we are going to use throughout the entire application.
 2. Effect Extensions, defined as rich wrappers.
@@ -94,8 +104,6 @@ We define the pattern in the package object of the application. Here is how it l
 
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/package.scala" ignore-other-snippets="true"}
 ```
-
-The pattern worked for me for a broad range of applications, but for more complicated cases, you may want to improve it – see [Directions for Improvement](#directions-for-improvement) section.
 
 # Running the Example
 ## Successful Run
@@ -115,7 +123,7 @@ We can feed a malformed JSON string to the handler to simulate a failure of the 
 ```
 <a href="/assets/visuals/effect-extensions/circe-parser-failure.png"><img src="/assets/visuals/effect-extensions/circe-parser-failure.png" width="100%" target="_blank"/></a>
 
-We can also have a correctly formatted JSON which does now have the `file` key the handler needs:
+We can also have a correctly formatted JSON which does not have the `file` key the handler needs:
 
 ```{.scala include="code/effect-extensions/src/main/scala/effectextensions/Main.scala" snippet="CirceKeyFailed"}
 ```
@@ -143,12 +151,12 @@ for {
 } yield ()
 ```
 
-I defined the effect extension methods as ordinary methods in the package object. However, the approach as in the code sample above forced me to use curly braces a lot. Usage of braces decreases the readability of code.
+I defined the effect extension methods as ordinary methods in the package object. However, the approach as in the code sample above forced me to use curly braces. Usage of braces decreases readability of code.
 
 The advantage of the effect extension pattern with rich wrappers is that the formalism required to specify the side effect types is localised at the end of the expressions and does not wrap them, which increases readability.
 
 # Directions for Improvement
-A big brother of the rich wrapper pattern is the type class pattern. If rich wrappers are not enough for your project, consider specifying effect extensions as type classes.
+The big brother of the rich wrapper pattern is the type class pattern. If rich wrappers are not enough for your project, consider specifying effect extensions as type classes.
 
 The motivation for placing the entire pattern into the package object is for it to be accessible from the entire application. The Cats library solves the accessibility problem by stuffing all the functionality into a single object. You can access all it implicits via a single import as follows:
 
