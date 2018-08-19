@@ -108,29 +108,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <div class="eleven columns content">
       <p class="meta">
-  April 13, 2016
-  <a href="/">
-    <i class="home fa fa-home"></i>
-  </a>
+Apr 13, 2016 <a href="/"> <i class="home fa fa-home"></i> </a>
 </p>
-
-<h1 class="title">Thread safety of SubScript values (and other scoped references)</h1>
-
+<h1 class="title">
+Thread safety of SubScript values (and other scoped references)
+</h1>
 <div id="post">
-  <div class="toc">
+<div class="toc">
 
 </div>
 <div class="body">
-<p>In <a href="https://github.com/scala-subscript/subscript">SubScript</a>, we have a possibility to use <code>val</code>s and <code>var</code>s in scripts. They are basically containers for data, just like Scala's <code>val</code>s and <code>var</code>s, but they store their data in SubScript VM data structures.</p>
-<p>Script itself is a tree of nodes defining its execution flow. Some nodes contain maps from names to values where <code>val</code>s and <code>var</code>s store their data. When a <code>val</code> is initialized, it writes to this map. When a <code>val</code> is used from a script, it requests a node where it was called for a value of a certain name. If it was not found, the parent of this node is requested, and so on, until the data is found.</p>
-<p>In other words, evaluation of <code>val</code>s and <code>var</code>s requires a scope of the node where their value is written.</p>
-<p>For example, the following script:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala">script live =
+<p>
+In <a href="https://github.com/scala-subscript/subscript">SubScript</a>, we have a possibility to use <code>val</code>s and <code>var</code>s in scripts. They are basically containers for data, just like Scala's <code>val</code>s and <code>var</code>s, but they store their data in SubScript VM data structures.
+</p>
+<p>
+Script itself is a tree of nodes defining its execution flow. Some nodes contain maps from names to values where <code>val</code>s and <code>var</code>s store their data. When a <code>val</code> is initialized, it writes to this map. When a <code>val</code> is used from a script, it requests a node where it was called for a value of a certain name. If it was not found, the parent of this node is requested, and so on, until the data is found.
+</p>
+<p>
+In other words, evaluation of <code>val</code>s and <code>var</code>s requires a scope of the node where their value is written.
+</p>
+<p>
+For example, the following script:
+</p>
+<div class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala">script live =
   <span class="kw">val</span> a = <span class="dv">3</span>
-  <span class="fu">println</span>(a)</code></pre></div>
-<p>will consist of a sequence operator node with two children. The first child, <code>val a = 3</code>, will write to the sequence's map that <code>a</code> has a value of <code>3</code>. The second child, <code>println(a)</code>, will request this data and output it.</p>
-<p>This approach, however, is not thread safe. The following <code>live</code> script, for example, will fail:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala">script live =
+  <span class="fu">println</span>(a)</code></pre>
+</div>
+<p>
+will consist of a sequence operator node with two children. The first child, <code>val a = 3</code>, will write to the sequence's map that <code>a</code> has a value of <code>3</code>. The second child, <code>println(a)</code>, will request this data and output it.
+</p>
+<p>
+This approach, however, is not thread safe. The following <code>live</code> script, for example, will fail:
+</p>
+<div class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala">script live =
   <span class="kw">val</span> a = <span class="dv">3</span>
   <span class="fu">f</span>(<span class="fu">println</span>(a))
   {..}
@@ -138,12 +150,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kw">def</span> <span class="fu">f</span>(task: =&gt; Unit) = <span class="kw">new</span> Thread (<span class="kw">new</span> Runnable {<span class="kw">override</span> <span class="kw">def</span> run {
   Thread.<span class="fu">sleep</span>(<span class="dv">1000</span>)
   task
-}}).<span class="fu">start</span>()</code></pre></div>
-<p>When the new thread created by <code>f</code> calls <code>task</code> (which is <code>println(a)</code>), an attempt to resolve <code>a</code> is made. Since its value is stored in the sequential operator's node (the topmost one in the tree), we need an access to it. But on the resolution time the link between the <code>f(println(a))</code> child and the sequential parent node is broken, since this child was deactivated after successful execution.</p>
-<p>The trickiness of the issue is mainly caused by the fact that SubScript is supposed to take care of all the threading and concurrency. You won't normally encounter any such problems if you operate solely in SubScript. But in some corner cases, you need to pass data to some foreign threads - for example, when working with frameworks.</p>
-<p>Concretely, in ScalaFX the GUI-related calls should be done from GUI thread via <code>Platform.runLater()</code> method. It accepts a by-name argument and executes it from the GUI thread. If you try to pass there a SubScript value, you're likely to run into the problem described above.</p>
-<p>The workaround is rather simple: we need to evaluate the reference that requires the scope while still in scope, and then pass its value outside the scope. In SubScript case, the solution is as follows:</p>
-<div class="sourceCode"><pre class="sourceCode scala"><code class="sourceCode scala">script live =
+}}).<span class="fu">start</span>()</code></pre>
+</div>
+<p>
+When the new thread created by <code>f</code> calls <code>task</code> (which is <code>println(a)</code>), an attempt to resolve <code>a</code> is made. Since its value is stored in the sequential operator's node (the topmost one in the tree), we need an access to it. But on the resolution time the link between the <code>f(println(a))</code> child and the sequential parent node is broken, since this child was deactivated after successful execution.
+</p>
+<p>
+The trickiness of the issue is mainly caused by the fact that SubScript is supposed to take care of all the threading and concurrency. You won't normally encounter any such problems if you operate solely in SubScript. But in some corner cases, you need to pass data to some foreign threads - for example, when working with frameworks.
+</p>
+<p>
+Concretely, in ScalaFX the GUI-related calls should be done from GUI thread via <code>Platform.runLater()</code> method. It accepts a by-name argument and executes it from the GUI thread. If you try to pass there a SubScript value, you're likely to run into the problem described above.
+</p>
+<p>
+The workaround is rather simple: we need to evaluate the reference that requires the scope while still in scope, and then pass its value outside the scope. In SubScript case, the solution is as follows:
+</p>
+<div class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala">script live =
     <span class="kw">val</span> a = <span class="dv">3</span>
     {!<span class="kw">val</span> _a = a; <span class="fu">f</span>(<span class="fu">println</span>(_a))!}
     {..}
@@ -151,33 +173,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <span class="kw">def</span> <span class="fu">f</span>(task: =&gt; Unit) = <span class="kw">new</span> Thread (<span class="kw">new</span> Runnable {<span class="kw">override</span> <span class="kw">def</span> run {
   Thread.<span class="fu">sleep</span>(<span class="dv">1000</span>)
   task
-}}).<span class="fu">start</span>()</code></pre></div>
+}}).<span class="fu">start</span>()</code></pre>
 </div>
 </div>
-
-<!-- 
-<div id="related">
-  <h3>Related Posts</h3>
-  <ul class="posts">
-     {% for post in site.related_posts limit:3 %}
-    <li>
-      <span>{{ post.date | date_to_string }} &raquo;</span> <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
-    {% endfor %}
-  </ul>
 </div>
- -->
-
 <div id="spread">
-  <!-- Twitter -->
-  <a class="twitter-share-button"
+<!-- Twitter --> <a class="twitter-share-button"
     href="https://twitter.com/intent/tweet?text=Thread safety of SubScript values (and other scoped references)"
-    data-size="large"><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-  Tweet</a>
-  <a href="https://twitter.com/AKmetyuk" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @AKmetyuk</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+    data-size="large">
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+Tweet</a> <a href="https://twitter.com/AKmetyuk" class="twitter-follow-button" data-show-count="false" data-size="large">Follow <span class="citation">@AKmetyuk</span></a>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
+<div id="disqus_thread">
 
-<div id="disqus_thread"></div>
+</div>
 <script>
 var disqus_config = function () {
 this.page.url = 'http://akmetiuk.com/posts/2016-04-13-subscript-values-in-by-name-calls.html';
@@ -193,19 +203,15 @@ s.setAttribute('data-timestamp', +new Date());
 (d.head || d.body).appendChild(s);
 })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+
 
       <div class="footer">
         <div class="disclaimer">
   <p>
     © Anatolii Kmetiuk, 2016 &mdash; built using <a href="https://github.com/swanson/lagom">Lagom theme</a>. Powered by <a href="https://github.com/anatoliykmetyuk/thera">Thera</a>. The sources of this site are availabel on <a href="https://github.com/anatoliykmetyuk/anatoliykmetyuk.github.io">GitHub</a>.
-  </p>
-</div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>l>o">GitHub</a>.
   </p>
 </div>
       </div>
