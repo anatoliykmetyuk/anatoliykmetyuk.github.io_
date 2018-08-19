@@ -3,6 +3,8 @@ template: post
 filters: [post]
 variables:
   title: Effect Extensions Pattern
+  description: A pattern to convert to your effect type from side effects and other effect types.
+  keywords: [scala,programming,functional programming,category theory,effect type,side effect,effect,typelevel,cats,monad,monad transformer]
   example: effect-extensions
 ---
 When programming in a purely functional style, we aim to reify side effects into data structures called *effect types*. An effect type you are using should be the same throughout the entire application so that different parts of the application are composable.
