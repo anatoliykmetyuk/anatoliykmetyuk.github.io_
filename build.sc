@@ -48,6 +48,8 @@ def build = for {
   _ <- log("Processing CSS assets")
   css <- template(src/"private-assets/css/all.css"
     , fragmentResolver = name => src/s"private-assets/css/${name}.css")
+  file = compiled/"assets/all.css"
+  _    = file.delete(true)
   _    = compiled/"assets/all.css" write css
 
   // Generate posts, create index.html
@@ -69,7 +71,9 @@ def processPost(post: Post, globalConfig: Json): Ef[Unit] =
     postJson <- post.asJson
     config    = globalConfig.deepMerge(postJson)
     res      <- template(post.inFile, config, templateFilters = tmlFilters)
-    _         = compiled/"posts"/post.htmlName write res
+    file      = compiled/"posts"/post.htmlName
+    _         = file.delete(true)
+    _         = file write res
   } yield ()
 
 def index(posts: List[Post], globalConfig: Json): Ef[Unit] =
@@ -79,6 +83,8 @@ def index(posts: List[Post], globalConfig: Json): Ef[Unit] =
     config = globalConfig.deepMerge( Json.obj(
                 "posts" -> Json.arr(postsJsonArr: _*)) )
     res <- template(src/"index.html", config)
+    file = compiled/"index.html"
+    _    = file.delete(true)
     _    = compiled/"index.html" write res
   } yield ()
 
