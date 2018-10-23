@@ -67,10 +67,10 @@ object E1_2_Conversion extends App {
   
   val usersApiPath = s"$apiPath/(\\d+)".r
   // start snippet E1_2_Conversion
-  val handler: ApiHandler = {
+  val handler: ApiHandler = {  // PartialFunction[String, Json]
     case usersApiPath(id) =>
       val user = UserDBSql.read(id.toInt)
-      user
+      user // User; User => Json
   }
   // end snippet E1_2_Conversion
   serve(handler)
@@ -135,12 +135,14 @@ object E3_Context {
   class RichUser(u: User, db: UserDB) {
     def write() = db.write(u)
   }
-  implicit def augmentUser(u: User)(implicit db: UserDB): RichUser = new RichUser(u, db)
+  implicit def augmentUser(u: User)(implicit db: UserDB): RichUser =
+    new RichUser(u, db)
   
   class RichId(x: Int, db: UserDB) {
     def readUser(): User = db.read(x)
   }
-  implicit def augmentInt(x: Int)(implicit db: UserDB): RichId = new RichId(x, db)
+  implicit def augmentInt(x: Int)(implicit db: UserDB): RichId =
+    new RichId(x, db)
   // end snippet E3_Context_conversions
 
   def main(args: Array[String]): Unit = {
@@ -164,10 +166,13 @@ object E4_WrapperShorthand {
   implicit class RichUser(u: User)(implicit db: UserDB) {
     def write() = db.write(u)
   }
+  // (User ^ UserDB) => RichUser
   
   implicit class RichId(x: Int)(implicit db: UserDB) {
     def readUser(): User = db.read(x)
   }
+  // (Int ^ UserDB) => RichId
+
   // end snippet E4_WrapperShorthand_conversions
 
   def main(args: Array[String]): Unit = {
@@ -175,6 +180,8 @@ object E4_WrapperShorthand {
 
     val u = User(42, "Bob")
     u.write()
+    // User => { def write() }
+    // (User ^ UserDB) => RichUser
     
     val usersApiPath = s"$apiPath/(\\d+)".r
     val handler: ApiHandler = {

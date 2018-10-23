@@ -1,4 +1,4 @@
-FROM thera:latest
+FROM akmetiuk/thera:0.1.0
 
 RUN apt-get update
 RUN apt-get -y upgrade

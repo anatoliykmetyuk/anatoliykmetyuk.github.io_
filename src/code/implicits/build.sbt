@@ -1,4 +1,4 @@
-val ScalaVer = "2.12.1"
+val ScalaVer = "2.12.6"
 
 lazy val commonSettings = Seq(
   name    := "Implicit Conversions"
@@ -12,9 +12,9 @@ lazy val commonSettings = Seq(
       "-language:higherKinds",
       "-language:implicitConversions",
       "-language:experimental.macros",
-      "-unchecked",
-      "-Xlint",
-      "-Ywarn-dead-code",
+      // "-unchecked",
+      // "-Xlint",
+      // "-Ywarn-dead-code",
       "-Xfuture")
 )
 
