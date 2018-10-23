@@ -64,6 +64,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="bio">
     <p>👨🏼‍💻Functional Programming and Data Science Freelancer. I implement web applications and machine learning solutions for people remotely. I write here about my work and my discoveries along the life journey.</p>
     <p>📕Check out <a href="https://www.amazon.com/Mastering-Functional-Programming-techniques-programming/dp/1788620798/">"Mastering Functional Programming"</a>, my latest book on purely functional programming in Scala with 😸<a href="https://typelevel.org/cats/">Cats</a> and the <a href="https://typelevel.org/">Typelevel</a> family of libraries.</p>
+    <p>🎓If you are interested in receiving mentorship from me, check out my profiles at <a href="https://www.codementor.io/anatoliikmetiuk">Codementor</a> and <a href="https://mentorcruise.com/mentor/AnatoliiKmetiuk/">MentorCruise</a>, or contact me via email to work out a custom program.</p>
     <p>📬Whether you are interested in working with me or just want to chat casually and get to know me better, you are always welcome to contact me. <a href="javascript:location='mailto:\u0061\u006e\u0061\u0074\u006f\u006c\u0069\u0069\u0040\u0066\u0075\u006e\u0063\u0074\u006f\u0072\u0074\u0065\u0063\u0068\u002e\u0063\u006f\u006d';void 0">✉️Shoot me a message</a> or <a href="https://calendly.com/anatoliykmetyuk/collaboration">📞schedule a call</a>, and let's see where it takes us.</p>
     <p>💡Some cool stuff I am working on:
       <ul style="list-style: none;">
@@ -301,10 +302,10 @@ It turns out Scala compiler can also see that and can wrap the <code>user</code>
 Now we can write the handler as:
 </p>
 <div class="sourceCode" include="code/implicits/src/main/scala/implicitconversions/Main.scala" snippet="E1_2_Conversion">
-<pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> handler: ApiHandler = {
+<pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">val</span> handler: ApiHandler = {  <span class="co">// PartialFunction[String, Json]</span>
   <span class="kw">case</span> <span class="fu">usersApiPath</span>(id) =&gt;
     <span class="kw">val</span> user = UserDBSql.<span class="fu">read</span>(id.<span class="fu">toInt</span>)
-    user
+    user <span class="co">// User; User =&gt; Json</span>
 }</code></pre>
 </div>
 <p>
@@ -437,12 +438,14 @@ With the implicit arguments, we can perform the dependency injection as follows:
 <pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">class</span> <span class="fu">RichUser</span>(u: User, db: UserDB) {
   <span class="kw">def</span> <span class="fu">write</span>() = db.<span class="fu">write</span>(u)
 }
-<span class="kw">implicit</span> <span class="kw">def</span> <span class="fu">augmentUser</span>(u: User)(<span class="kw">implicit</span> db: UserDB): RichUser = <span class="kw">new</span> <span class="fu">RichUser</span>(u, db)
+<span class="kw">implicit</span> <span class="kw">def</span> <span class="fu">augmentUser</span>(u: User)(<span class="kw">implicit</span> db: UserDB): RichUser =
+  <span class="kw">new</span> <span class="fu">RichUser</span>(u, db)
 
 <span class="kw">class</span> <span class="fu">RichId</span>(x: Int, db: UserDB) {
   <span class="kw">def</span> <span class="fu">readUser</span>(): User = db.<span class="fu">read</span>(x)
 }
-<span class="kw">implicit</span> <span class="kw">def</span> <span class="fu">augmentInt</span>(x: Int)(<span class="kw">implicit</span> db: UserDB): RichId = <span class="kw">new</span> <span class="fu">RichId</span>(x, db)</code></pre>
+<span class="kw">implicit</span> <span class="kw">def</span> <span class="fu">augmentInt</span>(x: Int)(<span class="kw">implicit</span> db: UserDB): RichId =
+  <span class="kw">new</span> <span class="fu">RichId</span>(x, db)</code></pre>
 </div>
 <p>
 Notice how the <code>write()</code> and <code>readUser()</code> methods no longer depend on anything outside the scope of their parent classes. Next, notice how the <code>db</code> backend is passed as an implicit argument to the implicit conversion methods. When the compiler needs to call these conversions, it will look up these implicit arguments and inject them into the original <code>implicit def</code>s:
@@ -472,10 +475,13 @@ The rich wrapper pattern discussed above is so commonly used that there is a lan
 <pre class="sourceCode scala"><code class="sourceCode scala"><span class="kw">implicit</span> <span class="kw">class</span> <span class="fu">RichUser</span>(u: User)(<span class="kw">implicit</span> db: UserDB) {
   <span class="kw">def</span> <span class="fu">write</span>() = db.<span class="fu">write</span>(u)
 }
+<span class="co">// (User ^ UserDB) =&gt; RichUser</span>
 
 <span class="kw">implicit</span> <span class="kw">class</span> <span class="fu">RichId</span>(x: Int)(<span class="kw">implicit</span> db: UserDB) {
   <span class="kw">def</span> <span class="fu">readUser</span>(): User = db.<span class="fu">read</span>(x)
-}</code></pre>
+}
+<span class="co">// (Int ^ UserDB) =&gt; RichId</span>
+</code></pre>
 </div>
 <p>
 Notice how class constructors can also have an implicit argument group.
