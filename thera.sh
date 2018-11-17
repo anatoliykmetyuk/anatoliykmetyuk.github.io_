@@ -13,12 +13,15 @@ PROJECT_NAME=akmetiuk
   IMAGE_NAME="$PROJECT_NAME:latest"
 
 function start_thera {
+  echo "Building image $IMAGE_NAME"
+  docker build -t $IMAGE_NAME .
+
   echo "Starting $IMAGE_NAME"
   docker run -td \
     -v "$SELF_DIR/_volumes/home:/root" \
     -v "$SELF_DIR:/root/$PROJECT_NAME" \
     -p 8888:8888 \
-    --name $"PROJECT_NAME" \
+    --name "$PROJECT_NAME" \
     --rm \
     --workdir "/root/$PROJECT_NAME" \
     "$IMAGE_NAME"
