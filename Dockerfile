@@ -1,4 +1,4 @@
-FROM hseeberger/scala-sbt
+FROM hseeberger/scala-sbt:8u242_1.3.8_2.13.1
 
 # Ammonite to run site build scripts
 RUN sh -c '(echo "#!/usr/bin/env sh" && curl -L https://github.com/lihaoyi/Ammonite/releases/download/1.1.2/2.12-1.1.2) > /usr/local/bin/amm && chmod +x /usr/local/bin/amm'
