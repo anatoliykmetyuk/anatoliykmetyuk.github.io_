@@ -2,7 +2,6 @@
 template: default
 filters: [populate,raw-pandoc]
 fragments:
-  spread: spread
   comments: comments
 ---
 <p class="meta">
@@ -31,5 +30,4 @@ sbt run
   #{body}
 </div>
 
-#{spread}
 #{comments}
