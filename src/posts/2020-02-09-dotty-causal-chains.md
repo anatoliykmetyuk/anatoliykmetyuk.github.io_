@@ -13,7 +13,7 @@ The advantages of having the problem framed are:
 
 - You pay attention to what's important and filter out everything else. If you are working on intuition, every detail might matter. However if the problem and the solution are described in terms of some domain, all that matters is to see the entities of that domain.
 - You are able to communicate your findings to others. This ability facilitates progress sharing and collaboration.
-– You are able to store your findings for later use. With intuitive approach this is not the case by definition, since you don't have the words to describe what you see. The advantage here is that you're able to free your memory and mental resources and hence scale up the size of the problems you can solve.
+- You are able to store your findings for later use. With intuitive approach this is not the case by definition, since you don't have the words to describe what you see. The advantage here is that you're able to free your memory and mental resources and hence scale up the size of the problems you can solve.
 
 # The Domain of Debugging
 ## Successful and Failing Cases
