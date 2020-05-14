@@ -3,7 +3,7 @@ template: post
 filters: [post]
 variables:
   title: Following Causal Chains in Dotty Codebase
-  description: TODO
+  description: My recent reflection on how exactly I debug Dotty issues
 ---
 
 # Framing the Problem
