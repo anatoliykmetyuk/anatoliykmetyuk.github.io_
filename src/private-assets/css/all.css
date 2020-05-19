@@ -1,15 +1,6 @@
----
-fragments:
-  base    : base
-  skeleton: skeleton
-  screen  : screen
-  layout  : layout
-  syntax  : syntax
-  pygments: pygments
----
-#{base}
-#{skeleton}
-#{screen}
-#{layout}
-#{syntax}
-#{pygments}
+${cssAsset: base}
+${cssAsset: skeleton}
+${cssAsset: screen}
+${cssAsset: layout}
+${cssAsset: syntax}
+${cssAsset: pygments}
