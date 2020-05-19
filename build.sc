@@ -14,20 +14,18 @@ implicit val copyOptions: CopyOptions = File.CopyOptions(overwrite = true)
 implicit val openOptions: OpenOptions = List(
   java.nio.file.StandardOpenOption.CREATE)
 
-val tmlFilters = Map(
-  "post" -> filter.command { """pandoc
+def postMarkdownToHtml(str: String): String =
+  pipeIntoCommand("""pandoc
     --toc
     --webtex
     --template=../src/templates/pandoc-post.html
     --filter /pandoc-filters/pandocfilters/examples/graphviz.py
     --filter /pandoc-filters/pandocfilters/examples/plantuml.py
-    --filter /pandoc-filters/include-code/include-code.py"""
-  }
+    --filter /pandoc-filters/include-code/include-code.py""",
+    str, compiled)
 
-, "raw-pandoc" -> filter.command { "pandoc" }
-)
-
-def log(msg: String) = att { println(msg) }
+def pandocRaw(str: String): String =
+  pipeIntoCommand("pandoc", str, compiled)
 
 def build = for {
   // Config
