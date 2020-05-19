@@ -1,10 +1,7 @@
 ---
-template: post
-filters: [post]
-variables:
-  title: Rewriting Process Algebra, Part 2&#58; Engine Theory
-  description: A rewriting-based process algebra implementation in Scala.
-  keywords: [process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming]
+title: Rewriting Process Algebra, Part 2&#58; Engine Theory
+description: A rewriting-based process algebra implementation in Scala.
+keywords: [process algebra,scala,subscript,free object,functional programming,algebra of communicating processes,acp,category theory,concurrent programming,concurrency,reactive programming]
 ---
 This is a second part of a progress report on my attempt to model a process algebra as an expression rewriting machine. This part covers the theoretical foundations of the two implementations (engines) of SubScript: the [standard one](https://github.com/scala-subscript/subscript), and [FreeACP](https://github.com/anatoliykmetyuk/free-acp), the one I am building. The other two parts:
 
@@ -32,18 +29,18 @@ digraph G {
     rankdir="BT";
     fontname="sans-serif";
     penwidth="0.1";
-    edge [comment="Wildcard edge", 
-          fontname="sans-serif", 
-          fontsize=10, 
-          colorscheme="blues3", 
-          color=2, 
+    edge [comment="Wildcard edge",
+          fontname="sans-serif",
+          fontsize=10,
+          colorscheme="blues3",
+          color=2,
           fontcolor=3];
-    node [fontname="serif", 
-          fontsize=13, 
-          fillcolor="1", 
-          colorscheme="blues4", 
-          color="2", 
-          fontcolor="4", 
+    node [fontname="serif",
+          fontsize=13,
+          fillcolor="1",
+          colorscheme="blues4",
+          color="2",
+          fontcolor="4",
           style="filled"];
     "+";
     "*1" [label="*"];
@@ -60,24 +57,24 @@ Note that under the `*` operators, only the `button()` operands are created, but
 
 2. When the button `first` is pressed, `button(first)` is finishes its evaluation (execution) with success - `ε`. The corresponding actor sends this event as a message to its supervising actor, `*`, and stops itself, removing itself from the hierarchy. `*` in turn forwards the message to `+`. Both these actors have the information that `first` has successfully finished at this point.
 3. `+` acts upon this information by cancelling its second operand
-4. `*` acts upon this information by instantiating an actor corresponding to its second operand, `setText(textField, "Hello World")`, and sending a message to it, ordering it to start execution. The resulting hierarchy after this step is as follows: 
+4. `*` acts upon this information by instantiating an actor corresponding to its second operand, `setText(textField, "Hello World")`, and sending a message to it, ordering it to start execution. The resulting hierarchy after this step is as follows:
 ```graphviz
 digraph G {
     rankdir="BT";
     fontname="sans-serif";
     penwidth="0.1";
-    edge [comment="Wildcard edge", 
-          fontname="sans-serif", 
-          fontsize=10, 
-          colorscheme="blues3", 
-          color=2, 
+    edge [comment="Wildcard edge",
+          fontname="sans-serif",
+          fontsize=10,
+          colorscheme="blues3",
+          color=2,
           fontcolor=3];
-    node [fontname="serif", 
-          fontsize=13, 
-          fillcolor="1", 
-          colorscheme="blues4", 
-          color="2", 
-          fontcolor="4", 
+    node [fontname="serif",
+          fontsize=13,
+          fillcolor="1",
+          colorscheme="blues4",
+          color="2",
+          fontcolor="4",
           style="filled"];
     "+";
     "*";

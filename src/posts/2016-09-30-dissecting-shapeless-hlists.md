@@ -1,11 +1,8 @@
 ---
-template: post
-filters: [post]
-variables:
-  title: Dissecting Shapeless&#58; HLists
-  redirect_from: /blog/2016/09/30/learning-shapeless-hlists.html
-  description: An overview of the architecture of Shapeless' heterogenous lists (HList).
-  keywords: [scala,shapeless,functional programming,category theory,heterogenous list,hlist,software architecture]
+title: Dissecting Shapeless&#58; HLists
+redirect_from: /blog/2016/09/30/learning-shapeless-hlists.html
+description: An overview of the architecture of Shapeless' heterogenous lists (HList).
+keywords: [scala,shapeless,functional programming,category theory,heterogenous list,hlist,software architecture]
 ---
 Shapeless is a Scala library that aims to make programming more type-safe. This means that you let the compiler know as much as possible about your program, so that if something is wrong with it, it is more likely to be caught during compile time.
 
@@ -114,7 +111,7 @@ To understand their architecture, let us look at an example of `IsHCons` type cl
     def head(l : L) : H
     def tail(l : L) : T
   }
-  
+
   object IsHCons {
     def apply[L <: HList](implicit isHCons: IsHCons[L]): Aux[L, isHCons.H, isHCons.T] = isHCons
 

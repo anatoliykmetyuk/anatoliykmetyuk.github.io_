@@ -1,8 +1,5 @@
 ---
-template: post
-filters: [post]
-variables:
-  title: Models for Life
+title: Models for Life
 ---
 
 # Planning for the Future
@@ -13,7 +10,7 @@ However, keeping these models in our mind he's not a good idea. This is because 
 
 Because of these limitations, people compose plans and do New Year resolutions. Because they know that without them, their lives are likely to degrade into their usual routine. Achievement requires a sacrifice, and not every sacrifice yields and achievement - much less the absence of the sacrifice. This is why we need to plan our time carefully, so that say a year from now we make progress in life.
 
-However, very frequently plans do not work as expected. The next day after the New Year, resolutions are frequently forgotten. Our lives degrade back into the ordinary routine. Why does this happen? One reason may be that the new information constantly pops up. For example, you have planned to learn programming starting from tomorrow. However, the next day you found out that you need to go out to buy some bread, and then a friend phoned you, and you had to go out. The day went by without your resolution being fulfilled. Another reason may be that you just found some excuse not to do what you plan to do. For instance, you plan to jog tomorrow morning, and the next day there is rain, and you use that as an excuse and don't jog. The plans are forgotten, and the lives go back to their ordinary routines. 
+However, very frequently plans do not work as expected. The next day after the New Year, resolutions are frequently forgotten. Our lives degrade back into the ordinary routine. Why does this happen? One reason may be that the new information constantly pops up. For example, you have planned to learn programming starting from tomorrow. However, the next day you found out that you need to go out to buy some bread, and then a friend phoned you, and you had to go out. The day went by without your resolution being fulfilled. Another reason may be that you just found some excuse not to do what you plan to do. For instance, you plan to jog tomorrow morning, and the next day there is rain, and you use that as an excuse and don't jog. The plans are forgotten, and the lives go back to their ordinary routines.
 
 ## Models
 This situation can be changed if you stop composing plans, and start composing models instead. What happens when we fail our plan? Usually feel guilty and bad, and we want to forget the episode as fast as possible. Maybe make some excuses so that we do not feel as bad in our own eyes. If the plan fails, we just throw it away and move according to the flow of life. However, the mind keeps composing models of the future - always, even if they fail. In my experience, if you stop treating whatever you resolve to do as a plan and treating it as a model instead things start to work as you model them. With time.
@@ -25,7 +22,7 @@ Why is such an approach not possible with our plans? Why do we not modify plans 
 Here are some examples of the models that I am using to plan my future.
 
 # Google sheets for Budget
-In Google Sheets, I have a separate table where I project my expenses for the next 3 months. I have three tables, one for each month, and each table has the following columns. 
+In Google Sheets, I have a separate table where I project my expenses for the next 3 months. I have three tables, one for each month, and each table has the following columns.
 
 - Name
 - Date

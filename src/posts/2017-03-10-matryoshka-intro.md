@@ -1,12 +1,9 @@
 ---
-template: post
-variables:
-  title: Introduction to Recursion Schemes with Matryoshka
-  categories: [blog]
-  description: Motivation for the recursion schemes based on fixed-point types and their implementation in Matryoshka.
-  keywords: [scala,programming,functional programming,category theory,recursion schemes,matryoshka,catamorphism,recursion]
-  example: matryoshka-intro
-filters: [post]
+title: Introduction to Recursion Schemes with Matryoshka
+categories: [blog]
+description: Motivation for the recursion schemes based on fixed-point types and their implementation in Matryoshka.
+keywords: [scala,programming,functional programming,category theory,recursion schemes,matryoshka,catamorphism,recursion]
+example: matryoshka-intro
 ---
 
 > Recursion is the GOTO of functional programming - Erik Meijer[^1]
@@ -14,7 +11,7 @@ filters: [post]
 [^1]: [https://twitter.com/headinthebox/status/384105824315928577?lang=en](https://twitter.com/headinthebox/status/384105824315928577?lang=en)
 
 # Recursive data structures
-In our daily programming life, we encounter recursive data structures on a regular basis. The best-known examples include linked lists and trees. Often working with such data structures we have a need to evaluate (collapse) them to a value. For example: 
+In our daily programming life, we encounter recursive data structures on a regular basis. The best-known examples include linked lists and trees. Often working with such data structures we have a need to evaluate (collapse) them to a value. For example:
 
 - Given a list of integers, say 1, 2 and 3, one may want to find their sum 6.
 - Given a parser of arithmetic expressions, such as `2 * 3 + 3`, we can expect it to produce a tree out of that expression - `Add(Mult(Num(2), Num(3)), Num(3))`. Such trees often need to be evaluated by actually performing these mathematical operations.
@@ -41,7 +38,7 @@ digraph G { label=" Structure " rankdir=LR
 
     subgraph cluster2 {
       S1 [label=" Succ "]
-      
+
       subgraph cluster3 {
         "Zero"
       }
@@ -49,7 +46,7 @@ digraph G { label=" Structure " rankdir=LR
   }
 
   S3 -> S2 -> S1 -> Zero [label=" previous "]
-} 
+}
 ```
 
 This would correspond to `Succ(Succ(Succ(Zero)))`. Note the recursive nature of this structure: a smaller substructure of the same type is present in every structure (except the terminal one, `Zero`).
@@ -116,7 +113,7 @@ digraph G { label=" Structure " rankdir=TB newrank=true
   subgraph cluster1 { label=" Substructure " graph[style=solid]
     Mult
     subgraph cluster3 { Num1[label=" Num "] Lit1[label=" 2 "] }
-    subgraph cluster4 { Num2[label=" Num "] Lit2[label=" 3 "] } 
+    subgraph cluster4 { Num2[label=" Num "] Lit2[label=" 3 "] }
   }
 
   subgraph cluster2 { label=" Substructure " Num3[label=" Num "] Lit3[label=" 3 "] }
@@ -163,7 +160,7 @@ digraph G { label=" Structure " rankdir=LR
   }
 
   S3 -> S2[label=" previous "]
-} 
+}
 ```
 
 Effectively, we have `Succ(previous = 2)`, which is then collapsed into `1 + 2` == `3`. However, `previous` is supposed to be a `Nat`, not an `Int`. In order to be able to write the above statement, we can allow the substructure to have an arbitrary type: `Succ[A](previous: A)`.

@@ -1,9 +1,6 @@
 ---
-template: post
-filters: [post]
-variables:
-  title: Debugging Complex Scala Code&#58; Tried and True Approaches
-  description: The tools and approaches I've been using for months that save me a lot of time when debugging the Dotty codebase.
+title: Debugging Complex Scala Code&#58; Tried and True Approaches
+description: The tools and approaches I've been using for months that save me a lot of time when debugging the Dotty codebase.
 ---
 
 11 months ago, I wrote an article about how I was fixing a Dotty bug. Back then, working under the processes I used, I produced a 60 pages long PDF document over the course of 10 days which documented the bug hunting workflow. The premise of the article was that if you adopt the right processes, the efficiency of the task in question increases dramatically. Back then, logging each step in a human-readable form was such a process for me.

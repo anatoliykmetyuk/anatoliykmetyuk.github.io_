@@ -1,15 +1,12 @@
 ---
-template: post
-filters: [post]
-variables:
-  title: Effect Extensions Pattern
-  description: A pattern to convert to your effect type from side effects and other effect types.
-  keywords: [scala,programming,functional programming,category theory,effect type,side effect,effect,typelevel,cats,monad,monad transformer]
-  example: effect-extensions
+title: Effect Extensions Pattern
+description: A pattern to convert to your effect type from side effects and other effect types.
+keywords: [scala,programming,functional programming,category theory,effect type,side effect,effect,typelevel,cats,monad,monad transformer]
+example: effect-extensions
 ---
 When programming in a purely functional style, we aim to reify side effects into data structures called *effect types*. An effect type you are using should be the same throughout the entire application so that different parts of the application are composable.
 
-When having multiple side effects and a single effect type to express them, the problem arises on how to convert the former to the latter conveniently. Also, when working with functional libraries, we need to translate from their effect systems – *foreign effect systems* – to the one used by our application. We need such translations because purely functional libraries – e.g. [Typelevel](https://typelevel.org/) stack – employ effect systems that are usually different from the one used by our application. 
+When having multiple side effects and a single effect type to express them, the problem arises on how to convert the former to the latter conveniently. Also, when working with functional libraries, we need to translate from their effect systems – *foreign effect systems* – to the one used by our application. We need such translations because purely functional libraries – e.g. [Typelevel](https://typelevel.org/) stack – employ effect systems that are usually different from the one used by our application.
 
 In this article, I would like to describe my approach for working with these conversions. We will use an analogy of how operating systems use file extensions to classify files by their type. We will apply the analogy to an example of HTTP handlers for a purely functional web server.
 
@@ -43,10 +40,10 @@ The handler receives a JSON body and performs the following business logic steps
 4. Read the file contents as a string.
 5. Output the file contents to the command line (the output effect simulates sending the contents as a response to the end user).
 
-In the above business logic, we encounter the following side effects and foreign effect types: 
+In the above business logic, we encounter the following side effects and foreign effect types:
 
 1. Foreign Effect: `Either`. In Circe, unsafe operations return the result under the effect type `Either[E <: io.circe.Error, A]`. `io.circe.Error` is an exception type, and `A` is a result type. We encounter this effect type when parsing and accessing JSON, points (1), (3) in the handler algorithm above.
-2. Side Effect: Suspension. We need to lift operations like the output to the command line into the IO context. We encounter this side effect when printing to the command line, points (2), (5) above. 
+2. Side Effect: Suspension. We need to lift operations like the output to the command line into the IO context. We encounter this side effect when printing to the command line, points (2), (5) above.
 3. Side Effect: throwing of exceptions. We need to handle OOP-style computations that may throw exceptions. We need to capture these exceptions under the `Ef` type as errors. We encounter this side effect in point (4) above.
 
 It is necessary to define how we are going to translate each of these side effects and foreign effect types into our effect type `Ef`. We need these translations to be declarative and easy to use so that they don't distract us from writing the business logic. Precisely, for each side effect and foreign effect type, we need a translation formalism that captures their meaning into `Ef`, along with the result they compute. How should we define such translation formalisms?
