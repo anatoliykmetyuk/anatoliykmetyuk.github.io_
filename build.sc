@@ -1,11 +1,5 @@
 // TODO
-// 1. Implement Thera's pipe and mapBody methods
 // 2. Move the Python scripts into this repo
-// 3. Each step of the generation should have its
-//    own context to prevent one giant shared state
-// 4. Move the config out of this file, make this file
-//    all about the logic
-// 5. Move the Scala sources to a separate dir
 
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
@@ -20,21 +14,24 @@ val compiled = file"_site/"
 val allPosts: List[Post] = (src/"posts")
   .collectChildren(_.extension.contains(".md"))
   .map(Post.fromFile).toList
+val defaultCtx: ValueHierarchy =
+  ValueHierarchy.yaml((src/"data/data.yml").contentAsString)
 
 implicit val copyOptions: CopyOptions =
   File.CopyOptions(overwrite = true)
 implicit val openOptions: OpenOptions =
   List(java.nio.file.StandardOpenOption.CREATE)
-implicit val ctx: ValueHierarchy =
-  ValueHierarchy.yaml((src/"data/data.yml").contentAsString) +
-  names(
-    "cssAsset" -> Function.function[Text] { name =>
-      (src/s"private-assets/css/${name}.css").contentAsString },
-    "allPosts" -> Arr(allPosts.sortBy(_.date)
-      .reverse.map(_.asValue))
+
+def htmlFragment(implicit ctx: => ValueHierarchy): Function =
+  names("htmlFragment" ->
+    Function.function[Text] { name =>
+      Thera((src/s"fragments/${name}.html").contentAsString)
+        .mkString
+    }
   )
 
 
+// === Build procedure ===
 def build(): Unit = {
   genStaticAssets()
   genCss()
@@ -51,6 +48,11 @@ def genStaticAssets(): Unit = {
 
 def genCss(): Unit = {
   println("Processing CSS assets")
+  implicit val ctx = defaultCtx + names(
+    "cssAsset" -> Function.function[Text] { name =>
+      (src/s"private-assets/css/${name}.css").contentAsString }
+  )
+
   val css = Thera(src/"private-assets/css/all.css").mkString
   write(compiled/"assets/all.css", css)
 }
@@ -61,9 +63,9 @@ def genPosts(): Unit = {
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
     println(s"[ $idx / ${allPosts.length} ] Processing ${post.inFile}")
-
-    implicit val ctx = post.thera.context +
-      postTemplate.context + defaultTemplate.context
+    implicit val ctx = defaultCtx + post.thera.context +
+      postTemplate.context + defaultTemplate.context +
+      htmlFragmentCtx
 
     val result = pipeThera(post, postTemplate, defaultTemplate)
 
@@ -73,6 +75,11 @@ def genPosts(): Unit = {
 
 def genIndex(): Unit = {
   println("Generating index.html")
+  implicit val ctx =  defaultCtx + htmlFragmentCtx + names(
+    "allPosts" -> Arr(allPosts.sortBy(_.date)
+      .reverse.map(_.asValue))
+  )
+
   val res = Thera((src/"index.html").contentAsString).mkString
   write(compiled/"index.html", res)
 }
