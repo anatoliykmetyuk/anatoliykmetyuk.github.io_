@@ -1,44 +1,26 @@
-import $ivy.`org.typelevel::cats-core:1.1.0`
-import $ivy.`org.typelevel::cats-effect:0.10.1`
-import $ivy.`io.circe::circe-core:0.10.0-M1`
-import $ivy.`io.circe::circe-yaml:0.8.0`
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
-import $ivy.`com.functortech::thera:0.0.3`
+import $ivy.`com.functortech::thera:0.2.0-M1`
 
 import java.util.Date
 import java.text.SimpleDateFormat
 
-import better.files._, File._, java.io.{ File => JFile }
-import cats._, cats.implicits._, io.circe._
+import better.files._
 import thera._
 
 case class Post(inFile: File, date: Date) {
   lazy val htmlName: String = s"${inFile.nameWithoutExtension}.html"
-
   lazy val url: String = s"/posts/$htmlName"
-  
   lazy val dateStr: String = Post.dateFormatter.format(date)
-
-
-  /** WARNING: this is a config, not variables! Variables are a part of config. */
-  def localConfig: Ef[Json] = template.parseConfig(inFile.lines)
-
-  def title: Ef[String] =
-    for {
-      config <- localConfig
-      title  <- exn { config.hcursor.downField("variables").get[String]("title") }
-    } yield title
-
-  def asJson: Ef[Json] = title.map { t => Json.obj(
-    "date"  -> Json.fromString(dateStr)
-  , "url"   -> Json.fromString(url    )
-  , "title" -> Json.fromString(t      ) ) }
+  lazy val src: String = ???
+  lazy val template: Template = Thera(src)
+  lazy val context: ValueHierarchy = template.context
+  lazy val title = context("variables.title").asStr.value
 }
 
 object Post {
   val dateParser    = new SimpleDateFormat("yyyy-MM-dd"    )
   val dateFormatter = new SimpleDateFormat("MMM dd, yyyy")
-  
+
   def fromFile(f: File): Post = {
     val postName = """(\d{4}-\d{2}-\d{2})-.*\.md""".r
     f.name match { case postName(dateStr) => Post(

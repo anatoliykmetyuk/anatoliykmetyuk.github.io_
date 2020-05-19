@@ -1,9 +1,5 @@
-import $ivy.`org.typelevel::cats-core:1.1.0`
-import $ivy.`org.typelevel::cats-effect:0.10.1`
-import $ivy.`io.circe::circe-core:0.10.0-M1`
-import $ivy.`io.circe::circe-yaml:0.8.0`
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
-import $ivy.`com.functortech::thera:0.0.3`
+import $ivy.`com.functortech::thera:0.2.0-M1`
 import $file.post, post._
 
 import better.files._, File._, java.io.{ File => JFile }
@@ -63,7 +59,7 @@ def build = for {
   // Delete the code directory
   _  = compiled/"code" delete()
 } yield ()
-  
+
 
 def processPost(post: Post, globalConfig: Json): Ef[Unit] =
   for {
