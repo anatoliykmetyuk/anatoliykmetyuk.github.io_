@@ -61,8 +61,12 @@ def genPosts(): Unit = {
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
     println(s"[ $idx / ${allPosts.length} ] Processing ${post.inFile}")
-    val result = post.thera.mapBody(postMarkdownToHtml)
-      .pipe(postTemplate).pipe(defaultTemplate).mkString
+
+    implicit val ctx = post.thera.context +
+      postTemplate.context + defaultTemplate.context
+
+    val result = pipeThera(post, postTemplate, defaultTemplate)
+
     write(compiled/"posts"/post.htmlName, result)
   }
 }

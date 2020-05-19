@@ -52,3 +52,9 @@ def write(f: File, str: String): Unit = {
   f.delete(true)
   f.write(str)
 }
+
+def pipeThera(tmls: Template*)(
+  implicit ctx: ValueHierarchy): String =
+  tmls.tail.foldLeft(tmls.head) { (v, tml) =>
+    tml.mkValue.asFunction(v.mkStr :: Nil)
+  }
