@@ -1,33 +1,13 @@
----
-template: default
-filters: [populate,raw-pandoc]
-fragments:
-  comments: comments
----
 <p class="meta">
-  #{date}
+  ${date}
   <a href="/">
     <i class="home fa fa-home"></i>
   </a>
 </p>
 
-<h1 class="title">#{title}</h1>
-#{if example}
-<div id="example-prompt">
-This article's code snippets come from a runnable  example! To run it, execute the following commands:
-
-```bash
-git clone https://github.com/anatoliykmetyuk/anatoliykmetyuk.github.io.git akmetiuk
-cd akmetiuk
-git checkout thera
-cd src/code/#{example}
-sbt run
-```
-</div>
-<hr/>
-#{end if}
+<h1 class="title">${title}</h1>
 <div id="post">
-  #{body}
+  ${body}
 </div>
 
-#{comments}
+${htmlFragment: comments}
