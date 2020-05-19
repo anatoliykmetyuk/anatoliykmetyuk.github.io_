@@ -8,8 +8,6 @@ import better.files._, File._, java.io.{ File => JFile }
 import thera._
 
 
-val src      = file"src/"
-val compiled = file"_site/"
 val allPosts: List[Post] = (src/"posts")
   .collectChildren(_.extension.contains(".md"))
   .map(Post.fromFile).toList

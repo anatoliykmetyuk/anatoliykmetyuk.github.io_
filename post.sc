@@ -35,6 +35,6 @@ object Post {
     val postName = """(\d{4}-\d{2}-\d{2})-.*\.md""".r
     f.name match { case postName(dateStr) => Post(
       file = f
-    , date   = dateParser.parse(dateStr)) }
+    , date = dateParser.parse(dateStr)) }
   }
 }

@@ -4,9 +4,12 @@ import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 
 import thera._
 
-import better.files.File
+import better.files._
 import org.apache.commons.io.IOUtils
 
+
+val src      = file"src/"
+val compiled = file"_site/"
 
 /**
  * Command line pipe. Invokes an external application, obtains its
@@ -42,9 +45,9 @@ def postMarkdownToHtml(str: String): String =
     --toc
     --webtex
     --template=../src/templates/pandoc-post.html
-    --filter ./pandoc-filters/graphviz.py
-    --filter ./pandoc-filters/plantuml.py
-    --filter ./pandoc-filters/include-code.py""",
+    --filter ../pandoc-filters/graphviz.py
+    --filter ../pandoc-filters/plantuml.py
+    --filter ../pandoc-filters/include-code.py""",
     str, compiled)
 
 def pandocRaw(str: String): String =
@@ -58,6 +61,6 @@ def write(f: File, str: String): Unit = {
 
 def pipeThera(tmls: Template*)(
   implicit ctx: ValueHierarchy): String =
-  tmls.tail.foldLeft(tmls.head) { (v, tml) =>
-    tml.mkValue.asFunction(v.mkStr :: Nil)
-  }
+  tmls.tail.foldLeft(tmls.head.mkValue) { (v, tml) =>
+    tml.mkValue.asFunction(v :: Nil)
+  }.asStr.value

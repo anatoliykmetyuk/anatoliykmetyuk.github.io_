@@ -21,7 +21,6 @@ function start_thera {
 
   echo "Starting $IMAGE_NAME"
   docker run -td \
-    -v "$SELF_DIR/_volumes/home:/root" \
     -v "$SELF_DIR:/root/$PROJECT_NAME" \
     -v "$HOME/.ivy2:/root/.ivy2" \
     -v "$HOME/.ammonite:/root/.ammonite" \
