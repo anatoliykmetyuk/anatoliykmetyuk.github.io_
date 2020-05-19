@@ -23,6 +23,9 @@ function start_thera {
   docker run -td \
     -v "$SELF_DIR/_volumes/home:/root" \
     -v "$SELF_DIR:/root/$PROJECT_NAME" \
+    -v "$HOME/.ivy2:/root/.ivy2" \
+    -v "$HOME/.ammonite:/root/.ammonite" \
+    -v "$HOME/.cache:/root/.cache" \
     -p 8888:8888 \
     --name "$PROJECT_NAME" \
     --rm \
@@ -39,7 +42,7 @@ function run_on_thera {
 }
 
 function build_thera {
-  run_on_thera amm build.sc
+  run_on_thera ./amm build.sc
 }
 
 function restart_thera {

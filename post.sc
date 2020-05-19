@@ -1,5 +1,5 @@
-import $ivy.`com.github.pathikrit::better-files:3.6.0`
-import $ivy.`com.functortech::thera:0.2.0-M1`
+import $ivy.`com.github.pathikrit::better-files:3.9.0`
+import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 
 import java.util.Date
 import java.text.SimpleDateFormat

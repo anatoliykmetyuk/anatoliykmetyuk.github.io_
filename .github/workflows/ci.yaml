@@ -2,9 +2,9 @@ name: Website CI/CD
 
 on:
   push:
-    branches: thera-1.0
+    branches: source
   pull_request:
-    branches: thera-1.0
+    branches: source
 
 jobs:
   test:
@@ -30,7 +30,7 @@ jobs:
           restore-keys: ${{ runner.os }}-general-
 
       - name: Build Website
-        run: amm build.sc
+        run: ./amm build.sc
 
   publish_website:
     runs-on: ubuntu-latest
@@ -57,7 +57,7 @@ jobs:
           restore-keys: ${{ runner.os }}-general-
 
       - name: Build Website
-        run: amm build.sc
+        run: ./amm build.sc
 
       - name: Deploy Website
         uses: peaceiris/actions-gh-pages@v3

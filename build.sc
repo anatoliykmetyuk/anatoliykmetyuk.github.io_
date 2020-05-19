@@ -1,6 +1,8 @@
-import $ivy.`com.github.pathikrit::better-files:3.6.0`
+import $ivy.`com.github.pathikrit::better-files:3.9.0`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
+
 import $file.post, post._
+import $file.util, util._
 
 import better.files._, File._, java.io.{ File => JFile }
 import thera._
