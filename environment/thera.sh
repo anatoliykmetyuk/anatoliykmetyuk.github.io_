@@ -8,13 +8,16 @@ HELP="Usage: thera <command>, where <command> is one of:
   help  - Show this message
   any other command - run that command on Thera Docker container (provided the container is running)."
 
-    SELF_DIR=`pwd`
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SELF_DIR="${SCRIPT_DIR}/.."
 PROJECT_NAME=akmetiuk
-  IMAGE_NAME="$PROJECT_NAME:latest"
+IMAGE_NAME="$PROJECT_NAME:latest"
 
 function start_thera {
   echo "Building image $IMAGE_NAME"
-  docker build -t $IMAGE_NAME .
+  docker build --file "$SCRIPT_DIR/Dockerfile" \
+    -t $IMAGE_NAME .
 
   echo "Starting $IMAGE_NAME"
   docker run -td \
