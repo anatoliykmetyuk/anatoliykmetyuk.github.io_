@@ -1,9 +1,9 @@
 <nav>
   <h1>Hi.</h1>
   <a href="/">
-    <img src="/assets/imgs/#{avatar}" id="logo" alt="Blog logo"/>
+    <img src="/assets/imgs/${avatar}" id="logo" alt="Blog logo"/>
   </a>
-  <h2>I'm <a href="/">#{name}</a>.</h2>
+  <h2>I'm <a href="/">${name}</a>.</h2>
   <div id="bio">
     <p>💻I'm a compiler engineer at LAMP/EPFL, working on Scala 3.</p>
     <p>Check out the books I've written:</p>
@@ -13,11 +13,15 @@
   <div id="social">
     Where to find me:
     <div id="stalker">
-      <a title="#{github} on Github" href="https://github.com/#{github}">
+      <a title="${github} on Github" href="https://github.com/${github}">
         <i class="fa fa-github-square"></i>
       </a>
 
-      <a title="#{name} on LinkedIn" href="https://www.linkedin.com/in/#{linkedin}">
+      <a title="${twitter} on Twitter" href="https://twitter.com/${twitter}">
+        <i class="fa fa-twitter-square"></i>
+      </a>
+
+      <a title="${name} on LinkedIn" href="https://www.linkedin.com/in/${linkedin}">
         <i class="fa fa-linkedin-square"></i>
       </a>
     </div>

@@ -8,11 +8,10 @@
 // 5. Move the Scala sources to a separate dir
 
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
-import $ivy.`com.functortech::thera:0.2.0-M1`
+import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 import $file.post, post._
 
 import better.files._, File._, java.io.{ File => JFile }
-import cats._, cats.implicits._, io.circe._
 import thera._
 
 
