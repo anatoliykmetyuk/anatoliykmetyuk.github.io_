@@ -1,6 +1,3 @@
-// TODO
-// 2. Move the Python scripts into this repo
-
 import $ivy.`com.github.pathikrit::better-files:3.6.0`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 import $file.post, post._

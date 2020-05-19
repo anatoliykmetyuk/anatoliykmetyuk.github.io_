@@ -39,9 +39,9 @@ def postMarkdownToHtml(str: String): String =
     --toc
     --webtex
     --template=../src/templates/pandoc-post.html
-    --filter /pandoc-filters/pandocfilters/examples/graphviz.py
-    --filter /pandoc-filters/pandocfilters/examples/plantuml.py
-    --filter /pandoc-filters/include-code/include-code.py""",
+    --filter ./pandoc-filters/graphviz.py
+    --filter ./pandoc-filters/plantuml.py
+    --filter ./pandoc-filters/include-code.py""",
     str, compiled)
 
 def pandocRaw(str: String): String =
