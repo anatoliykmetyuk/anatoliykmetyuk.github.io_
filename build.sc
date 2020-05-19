@@ -5,7 +5,7 @@ import $file.post, post._
 import $file.util, util._
 
 import better.files._, File._, java.io.{ File => JFile }
-import thera._
+import thera._, ValueHierarchy.names
 
 
 val allPosts: List[Post] = (src/"posts")
@@ -19,13 +19,16 @@ implicit val copyOptions: CopyOptions =
 implicit val openOptions: OpenOptions =
   List(java.nio.file.StandardOpenOption.CREATE)
 
-def htmlFragment(implicit ctx: => ValueHierarchy): Function =
+def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
   names("htmlFragment" ->
-    Function.function[Text] { name =>
-      Thera((src/s"fragments/${name}.html").contentAsString)
-        .mkString
+    Function.function[Str] { name =>
+      Thera((src/s"fragments/${name.value}.html").contentAsString)
+        .mkValue.asStr
     }
   )
+
+val postTemplate = Thera((src/"templates"/"post.html").contentAsString)
+val defaultTemplate = Thera((src/"templates"/"default.html").contentAsString)
 
 
 // === Build procedure ===
@@ -46,11 +49,11 @@ def genStaticAssets(): Unit = {
 def genCss(): Unit = {
   println("Processing CSS assets")
   implicit val ctx = defaultCtx + names(
-    "cssAsset" -> Function.function[Text] { name =>
-      (src/s"private-assets/css/${name}.css").contentAsString }
+    "cssAsset" -> Function.function[Str] { name =>
+      Str((src/s"private-assets/css/${name.value}.css").contentAsString) }
   )
 
-  val css = Thera(src/"private-assets/css/all.css").mkString
+  val css = Thera((src/"private-assets/css/all.css").contentAsString).mkString
   write(compiled/"assets/all.css", css)
 }
 
@@ -59,12 +62,12 @@ def genPosts(): Unit = {
   (compiled/"posts").createDirectoryIfNotExists()
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
-    println(s"[ $idx / ${allPosts.length} ] Processing ${post.inFile}")
-    implicit val ctx = defaultCtx + post.thera.context +
+    println(s"[ $idx / ${allPosts.length} ] Processing ${post.file}")
+    implicit lazy val ctx: ValueHierarchy = defaultCtx + post.thera.context +
       postTemplate.context + defaultTemplate.context +
       htmlFragmentCtx
 
-    val result = pipeThera(post, postTemplate, defaultTemplate)
+    val result = pipeThera(post.thera, postTemplate, defaultTemplate)
 
     write(compiled/"posts"/post.htmlName, result)
   }
@@ -72,12 +75,14 @@ def genPosts(): Unit = {
 
 def genIndex(): Unit = {
   println("Generating index.html")
-  implicit val ctx =  defaultCtx + htmlFragmentCtx + names(
+  implicit lazy val ctx: ValueHierarchy = defaultCtx + htmlFragmentCtx + names(
     "allPosts" -> Arr(allPosts.sortBy(_.date)
       .reverse.map(_.asValue))
   )
 
-  val res = Thera((src/"index.html").contentAsString).mkString
+  val res = pipeThera(Thera((src/"index.html")
+    .contentAsString), defaultTemplate)
+
   write(compiled/"index.html", res)
 }
 
