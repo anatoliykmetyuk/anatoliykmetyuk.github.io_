@@ -60,11 +60,19 @@ def genPosts(): Unit = {
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
     println(s"[ $idx / ${allPosts.length} ] Processing ${post.file}")
-    implicit lazy val ctx: ValueHierarchy = defaultCtx + post.thera.context +
-      postTemplate.context + defaultTemplate.context +
-      htmlFragmentCtx
+    val (header, body) = Thera.split(post.src)
+    val postHtml = Thera.quote(postMarkdownToHtml(body))
+    val postThera = Thera(Thera.join(header, postHtml))
 
-    val result = pipeThera(post.thera, postTemplate, defaultTemplate)
+    implicit lazy val ctx: ValueHierarchy =
+      defaultCtx + postThera.context +
+      postTemplate.context + defaultTemplate.context +
+      htmlFragmentCtx + names(
+        "date" -> Str(post.dateStr),
+        "url" -> Str(post.url)
+      )
+
+    val result = pipeThera(postThera, postTemplate, defaultTemplate)
     writeFile(compiled/"posts"/post.htmlName, result)
   }
 }

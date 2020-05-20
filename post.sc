@@ -11,14 +11,7 @@ case class Post(file: Path, date: Date) {
   lazy val url: String = s"/posts/$htmlName"
   lazy val dateStr: String = Post.dateFormatter.format(date)
   lazy val src: String = read(file)
-  lazy val thera: Template = {
-    val tml = Thera(src)
-    tml.copy(context = tml.context + ValueHierarchy.names(
-      "date" -> Str(dateStr),
-      "url" -> Str(url)
-    ))
-  }
-  lazy val title: String = thera.context("variables.title").asStr.value
+  lazy val title: String = Thera(src).context("variables.title").asStr.value
   lazy val asValue: Value = ValueHierarchy.names(
     "date"  -> Str(dateStr),
     "url"   -> Str(url),
