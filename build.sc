@@ -11,19 +11,19 @@ val allPosts: List[Post] = (src/"posts")
   .collectChildren(_.extension.contains(".md"))
   .map(Post.fromFile).toList
 val defaultCtx: ValueHierarchy =
-  ValueHierarchy.yaml((src/"data/data.yml").contentAsString)
+  ValueHierarchy.yaml(read(src/"data/data.yml"))
 
 
 def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
   names("htmlFragment" ->
     Function.function[Str] { name =>
-      Thera((src/s"fragments/${name.value}.html").contentAsString)
+      Thera(read(src/s"fragments/${name.value}.html"))
         .mkValue.asStr
     }
   )
 
-val postTemplate = Thera((src/"templates"/"post.html").contentAsString)
-val defaultTemplate = Thera((src/"templates"/"default.html").contentAsString)
+val postTemplate = Thera(read(src/"templates"/"post.html"))
+val defaultTemplate = Thera(read(src/"templates"/"default.html"))
 
 
 // === Build procedure ===
@@ -38,18 +38,18 @@ def build(): Unit = {
 def genStaticAssets(): Unit = {
   println("Copying static assets")
   for (f <- List("assets", "code", "CNAME", "favicon.png"))
-    os.copy.over(src/f, compiled/f)
+    copy.over(src/f, compiled/f)
 }
 
 def genCss(): Unit = {
   println("Processing CSS assets")
   implicit val ctx = defaultCtx + names(
     "cssAsset" -> Function.function[Str] { name =>
-      Str((src/s"private-assets/css/${name.value}.css").contentAsString) }
+      Str(read(src/s"private-assets/css/${name.value}.css")) }
   )
 
-  val css = Thera((src/"private-assets/css/all.css").contentAsString).mkString
-  os.write(compiled/"assets/all.css", css)
+  val css = Thera(read(src/"private-assets/css/all.css")).mkString
+  writeFile(compiled/"assets/all.css", css)
 }
 
 def genPosts(): Unit = {
@@ -63,8 +63,7 @@ def genPosts(): Unit = {
       htmlFragmentCtx
 
     val result = pipeThera(post.thera, postTemplate, defaultTemplate)
-
-    write(compiled/"posts"/post.htmlName, result)
+    writeFile(compiled/"posts"/post.htmlName, result)
   }
 }
 
@@ -75,13 +74,13 @@ def genIndex(): Unit = {
       .reverse.map(_.asValue))
   )
 
-  val res = pipeThera(Thera((src/"index.html")
-    .contentAsString), defaultTemplate)
+  val res = pipeThera(
+    Thera(read(src/"index.html")), defaultTemplate)
 
-  write(compiled/"index.html", res)
+  writeFile(compiled/"index.html", res)
 }
 
 def cleanup(): Unit =
-  (compiled/"code").delete()
+  remove(compiled/"code")
 
 build()

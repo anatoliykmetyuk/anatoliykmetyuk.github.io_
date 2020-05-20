@@ -10,7 +10,7 @@ case class Post(file: Path, date: Date) {
   lazy val htmlName: String = s"${file.baseName}.html"
   lazy val url: String = s"/posts/$htmlName"
   lazy val dateStr: String = Post.dateFormatter.format(date)
-  lazy val src: String = os.read(file)
+  lazy val src: String = read(file)
   lazy val thera: Template = {
     val tml = Thera(src)
     tml.copy(context = tml.context + ValueHierarchy.names(

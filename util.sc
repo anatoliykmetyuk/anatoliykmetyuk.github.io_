@@ -4,8 +4,8 @@ import thera._
 import os._
 
 
-val src      = os.pwd/"src"
-val compiled = os.pwd/"_site"
+val src      = pwd/"src"
+val compiled = pwd/"_site"
 
 /**
  * Command line pipe. Invokes an external application, obtains its
@@ -15,7 +15,7 @@ val compiled = os.pwd/"_site"
  */
 def pipeIntoCommand(cmd: String, input: String, workdir: Path,
   encoding: String = "utf8"): String = {
-  val p = os.proc(cmd).call(
+  val p = proc(cmd).call(
     cwd = workdir,
     stdin = input
   )
@@ -36,9 +36,8 @@ def postMarkdownToHtml(str: String): String =
 def pandocRaw(str: String): String =
   pipeIntoCommand("pandoc", str, compiled)
 
-
-def write(f: Path, str: String): Unit =
-  os.write.over(path, str,
+def writeFile(f: Path, str: String): Unit =
+  write.over(path, str,
     createFolders = true, truncate = false)
 
 def pipeThera(tmls: Template*)(
