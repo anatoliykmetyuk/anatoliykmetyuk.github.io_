@@ -35,7 +35,7 @@ val defaultTemplate = Thera(read(src/"templates"/"default.html"))
 
 // === Build procedure ===
 def build(): Unit = {
-  remove.all(compiled)
+  list(compiled).foreach(remove.all)
   genStaticAssets()
   genCss()
   genPosts()
