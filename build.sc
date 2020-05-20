@@ -25,7 +25,7 @@ def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
 
       var source = read(src/s"fragments"/s"${name.value}.html")
       if (containsJs(name.value)) source = Thera.quote(source)
-      Thera(source).mkValue.asStr
+      Thera(source).mkValue(ctx).asStr
     }
   )
 
@@ -65,18 +65,19 @@ def genPosts(): Unit = {
   println(s"Processing ${allPosts.length} posts...")
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
-    println(s"[ $idx / ${allPosts.length} ] Processing ${post.file}")
+    println(s"[$idx/${allPosts.length}] Processing ${post.file}")
     val (header, body) = Thera.split(post.src)
     val postHtml = Thera.quote(postMarkdownToHtml(body))
     val postThera = Thera(Thera.join(header, postHtml))
 
     implicit lazy val ctx: ValueHierarchy =
-      defaultCtx + postThera.context +
-      postTemplate.context + defaultTemplate.context +
-      htmlFragmentCtx + names(
+      defaultCtx + defaultTemplate.context +
+      postTemplate.context +
+      postThera.context +
+      names(
         "date" -> Str(post.dateStr),
-        "url" -> Str(post.url)
-      )
+        "url" -> Str(post.url),
+      ) + htmlFragmentCtx
 
     val result = pipeThera(postThera, postTemplate, defaultTemplate)
     writeFile(compiled/"posts"/post.htmlName, result)
@@ -85,18 +86,19 @@ def genPosts(): Unit = {
 
 def genIndex(): Unit = {
   println("Generating index.html")
-  implicit lazy val ctx: ValueHierarchy = defaultCtx + htmlFragmentCtx + names(
-    "allPosts" -> Arr(allPosts.sortBy(_.date)
-      .reverse.map(_.asValue))
-  )
+  val index = Thera(read(src/"index.html"))
+  implicit lazy val ctx: ValueHierarchy =
+    defaultCtx + defaultTemplate.context +
+    index.context + htmlFragmentCtx + names(
+      "allPosts" -> Arr(allPosts.sortBy(_.date)
+        .reverse.map(_.asValue))
+    )
 
-  val res = pipeThera(
-    Thera(read(src/"index.html")), defaultTemplate)
-
+  val res = pipeThera(index, defaultTemplate)
   writeFile(compiled/"index.html", res)
 }
 
 def cleanup(): Unit =
-  remove(compiled/"code")
+  remove.all(compiled/"code")
 
 build()
