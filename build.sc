@@ -7,11 +7,12 @@ import os._
 import thera._, ValueHierarchy.names
 
 
-val allPosts: List[Post] = (src/"posts")
-  .collectChildren(_.extension.contains(".md"))
-  .map(Post.fromFile).toList
+val allPosts: List[Post] = walk(
+    path = src/"posts",
+    skip = p => p.ext !="md"
+  ).map(Post.fromPath).toList
 val defaultCtx: ValueHierarchy =
-  ValueHierarchy.yaml(read(src/"data/data.yml"))
+  ValueHierarchy.yaml(read(src/"data"/"data.yml"))
 
 
 def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
@@ -45,16 +46,15 @@ def genCss(): Unit = {
   println("Processing CSS assets")
   implicit val ctx = defaultCtx + names(
     "cssAsset" -> Function.function[Str] { name =>
-      Str(read(src/s"private-assets/css/${name.value}.css")) }
+      Str(read(src/s"private-assets"/"css"/"${name.value}.css")) }
   )
 
-  val css = Thera(read(src/"private-assets/css/all.css")).mkString
-  writeFile(compiled/"assets/all.css", css)
+  val css = Thera(read(src/"private-assets"/"css"/"all.css")).mkString
+  writeFile(compiled/"assets"/"all.css", css)
 }
 
 def genPosts(): Unit = {
   println(s"Processing ${allPosts.length} posts...")
-  (compiled/"posts").createDirectoryIfNotExists()
 
   for ( (post, idx) <- allPosts.zipWithIndex ) {
     println(s"[ $idx / ${allPosts.length} ] Processing ${post.file}")

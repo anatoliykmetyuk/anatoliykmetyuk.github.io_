@@ -37,7 +37,7 @@ def pandocRaw(str: String): String =
   pipeIntoCommand("pandoc", str, compiled)
 
 def writeFile(f: Path, str: String): Unit =
-  write.over(path, str,
+  write.over(f, str,
     createFolders = true, truncate = false)
 
 def pipeThera(tmls: Template*)(
