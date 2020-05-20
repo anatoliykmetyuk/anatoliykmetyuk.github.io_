@@ -18,8 +18,14 @@ val defaultCtx: ValueHierarchy =
 def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
   names("htmlFragment" ->
     Function.function[Str] { name =>
-      Thera(read(src/s"fragments/${name.value}.html"))
-        .mkValue.asStr
+      val containsJs = Set(
+        "analytics",
+        "google-tag-manager-head",
+      )
+
+      var source = read(src/s"fragments"/s"${name.value}.html")
+      if (containsJs(name.value)) source = Thera.quote(source)
+      Thera(source).mkValue.asStr
     }
   )
 

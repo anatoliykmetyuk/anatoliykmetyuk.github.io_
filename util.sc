@@ -13,7 +13,7 @@ val compiled = pwd/"_site"
  * the `input` to the output stream. Returns the contents of the
  * input stream of the command.
  */
-def pipeIntoCommand(cmd: String, input: String, workdir: Path,
+def pipeIntoCommand(cmd: List[String], input: String, workdir: Path,
   encoding: String = "utf8"): String = {
   val p = proc(cmd).call(
     cwd = workdir,
@@ -24,17 +24,18 @@ def pipeIntoCommand(cmd: String, input: String, workdir: Path,
 }
 
 def postMarkdownToHtml(str: String): String =
-  pipeIntoCommand("""pandoc
-    --toc
-    --webtex
-    --template=../src/templates/pandoc-post.html
-    --filter ../pandoc-filters/graphviz.py
-    --filter ../pandoc-filters/plantuml.py
-    --filter ../pandoc-filters/include-code.py""",
+  pipeIntoCommand(
+    "pandoc" ::
+    "--toc" ::
+    "--webtex" ::
+    "--template=../src/templates/pandoc-post.html" ::
+    "--filter=../pandoc-filters/graphviz.py" ::
+    "--filter=../pandoc-filters/plantuml.py" ::
+    "--filter=../pandoc-filters/include-code.py" :: Nil,
     str, compiled)
 
 def pandocRaw(str: String): String =
-  pipeIntoCommand("pandoc", str, compiled)
+  pipeIntoCommand("pandoc" :: Nil, str, compiled)
 
 def writeFile(f: Path, str: String): Unit =
   write.over(f, str,
