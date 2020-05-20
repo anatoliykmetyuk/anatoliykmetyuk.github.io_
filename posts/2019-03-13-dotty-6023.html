@@ -18,7 +18,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="author" content="Anatolii Kmetiuk" />
 
 <meta name="description" content="Thought processes that can be used when working with large code bases">
-<meta name="keywords" content="scala,programming,functional programming,category theory,kmetiuk,kmetyuk,anatolii kmetiuk,anatoliy kmetyuk">
+<meta name="keywords" content="scala, programming, functional programming, category theory, kmetiuk, kmetyuk, anatolii kmetiuk, anatoliy kmetyuk">
 
 <!-- Facebook tags -->
 <meta property="og:title" content="Hacking on Dotty&#58; The Diary">
@@ -33,9 +33,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:description" content="Thought processes that can be used when working with large code bases" />
 <meta name="twitter:title" content="Hacking on Dotty&#58; The Diary" />
-<meta name="twitter:site" content="@AKmetyuk" />
+<meta name="twitter:site" content="@akmetiuk" />
 <meta name="twitter:image" content="http://akmetiuk.com/assets/imgs/avatar_100.png" />
-<meta name="twitter:creator" content="@AKmetyuk" />
+<meta name="twitter:creator" content="@akmetiuk" />
+
 
   <link rel="canonical" href="http://akmetiuk.com/posts/2019-03-13-dotty-6023.html" />
 
@@ -73,72 +74,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <i class="fa fa-github-square"></i>
       </a>
 
-      <a title="Anatolii Kmetiuk on LinkedIn" href="https://www.linkedin.com/in/anatoliykmetyuk">
+      <a title="akmetiuk on Twitter" href="https://twitter.com/akmetiuk">
+        <i class="fa fa-twitter-square"></i>
+      </a>
+
+      <a title="Anatolii Kmetiuk on LinkedIn" href="https://www.linkedin.com/in/akmetiuk">
         <i class="fa fa-linkedin-square"></i>
       </a>
     </div>
   </div>
 </nav>
+
     </div>
 
     <div class="eleven columns content">
       <p class="meta">
-Mar 13, 2019 <a href="/"> <i class="home fa fa-home"></i> </a>
+  Mar 13, 2019
+  <a href="/">
+    <i class="home fa fa-home"></i>
+  </a>
 </p>
-<h1 class="title">
-Hacking on Dotty: The Diary
-</h1>
+
+<h1 class="title">Hacking on Dotty&#58; The Diary</h1>
 <div id="post">
-<div class="toc">
+  <div class="toc">
 
 </div>
 <div class="body">
-<p>
-Recently I was working on the <a href="https://github.com/lampepfl/dotty/pull/6023">solution</a> to <a href="https://github.com/lampepfl/dotty/issues/5980">this bug</a> in the Dotty compiler. While doing so, I was also testing an approach inspired by the <a href="https://www.wikiwand.com/en/Theory_of_constraints">Theory of Constraints</a> (see my previous blog posts about the models) when applied to working with large code bases.
-</p>
-<p>
-The approach is all about maintaining the order in your head while being at an unknown location. So far, for me writing things down was one of the best ways to do so.
-</p>
-<p>
-So I logged my journey – from forking Dotty to hacking on it and making that bug go away. The log is an unedited dump from Evernote, so don't expect smooth flow of thought – but maybe some will find it entertaining or even useful.
-</p>
+<p>Recently I was working on the <a href="https://github.com/lampepfl/dotty/pull/6023">solution</a> to <a href="https://github.com/lampepfl/dotty/issues/5980">this bug</a> in the Dotty compiler. While doing so, I was also testing an approach inspired by the <a href="https://www.wikiwand.com/en/Theory_of_constraints">Theory of Constraints</a> (see my previous blog posts about the models) when applied to working with large code bases.</p>
+<p>The approach is all about maintaining the order in your head while being at an unknown location. So far, for me writing things down was one of the best ways to do so.</p>
+<p>So I logged my journey – from forking Dotty to hacking on it and making that bug go away. The log is an unedited dump from Evernote, so don't expect smooth flow of thought – but maybe some will find it entertaining or even useful.</p>
 <ul>
-<li>
-💾<a href="/assets/files/dotty-6023/Dotty-pr-6023.pdf">Download the log PDF</a>
-</li>
-<li>
-💾<a href="/assets/files/dotty-6023/dotty-pr-6023-attachments.zip">Download the attachments</a> the log references
-</li>
+<li>💾<a href="/assets/files/dotty-6023/Dotty-pr-6023.pdf">Download the log PDF</a></li>
+<li>💾<a href="/assets/files/dotty-6023/dotty-pr-6023-attachments.zip">Download the attachments</a> the log references</li>
 </ul>
 </div>
 </div>
-<div id="disqus_thread">
-
-</div>
-<script>
-var disqus_config = function () {
-this.page.url = 'http://akmetiuk.com/posts/2019-03-13-dotty-6023.html';
-this.page.identifier = '/posts/2019-03-13-dotty-6023.html';
-};
-
-(function() {
-var d = document, s = d.createElement('script');
-
-s.src = '//anatoliikmetiukblog.disqus.com/embed.js';
-
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>
-Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
-</noscript>
 
 
       <div class="footer">
         <div class="disclaimer">
   <p>
-    © Anatolii Kmetiuk, 2016 &mdash; built using <a href="https://github.com/swanson/lagom">Lagom theme</a>. Powered by <a href="https://github.com/anatoliykmetyuk/thera">Thera</a>. The sources of this site are availabel on <a href="https://github.com/anatoliykmetyuk/anatoliykmetyuk.github.io">GitHub</a>.
+    © Anatolii Kmetiuk, 2016 - 2020 &mdash; built using <a href="https://github.com/swanson/lagom">Lagom theme</a>. Powered by <a href="https://github.com/anatoliykmetyuk/thera">Thera</a>. The sources of this site are availabel on <a href="https://github.com/anatoliykmetyuk/anatoliykmetyuk.github.io">GitHub</a>.
   </p>
 </div>
       </div>
