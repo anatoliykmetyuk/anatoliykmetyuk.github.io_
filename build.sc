@@ -1,10 +1,8 @@
-import $ivy.`com.github.pathikrit::better-files:3.9.0`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 
 import $file.post, post._
 import $file.util, util._
 
-import better.files._, File._, java.io.{ File => JFile }
 import thera._, ValueHierarchy.names
 
 
@@ -14,10 +12,6 @@ val allPosts: List[Post] = (src/"posts")
 val defaultCtx: ValueHierarchy =
   ValueHierarchy.yaml((src/"data/data.yml").contentAsString)
 
-implicit val copyOptions: CopyOptions =
-  File.CopyOptions(overwrite = true)
-implicit val openOptions: OpenOptions =
-  List(java.nio.file.StandardOpenOption.CREATE)
 
 def htmlFragmentCtx(implicit ctx: => ValueHierarchy): ValueHierarchy =
   names("htmlFragment" ->

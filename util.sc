@@ -1,15 +1,14 @@
-import $ivy.`com.github.pathikrit::better-files:3.9.0`
 import $ivy.`commons-io:commons-io:2.6`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 
 import thera._
 
-import better.files._
+import os._
 import org.apache.commons.io.IOUtils
 
 
-val src      = file"src/"
-val compiled = file"_site/"
+val src      = os.pwd/"src"
+val compiled = os.pwd/"_site"
 
 /**
  * Command line pipe. Invokes an external application, obtains its
@@ -17,9 +16,9 @@ val compiled = file"_site/"
  * the `input` to the output stream. Returns the contents of the
  * input stream of the command.
  */
-def pipeIntoCommand(cmd: String, input: String, workdir: File,
+def pipeIntoCommand(cmd: String, input: String, workdir: Path,
   encoding: String = "utf8"): String = {
-  val proc = sys.runtime.exec(cmd, null, workdir.toJava)
+  val proc = sys.runtime.exec(cmd, null, workdir.toIO)
   val is   = proc.getInputStream
   val os   = proc.getOutputStream
   val es   = proc.getErrorStream
