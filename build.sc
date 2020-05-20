@@ -29,6 +29,7 @@ val defaultTemplate = Thera(read(src/"templates"/"default.html"))
 
 // === Build procedure ===
 def build(): Unit = {
+  remove.all(compiled)
   genStaticAssets()
   genCss()
   genPosts()
@@ -39,14 +40,15 @@ def build(): Unit = {
 def genStaticAssets(): Unit = {
   println("Copying static assets")
   for (f <- List("assets", "code", "CNAME", "favicon.png"))
-    copy.over(src/f, compiled/f)
+    copy(src/f, compiled/f,
+      replaceExisting = true, createFolders = true)
 }
 
 def genCss(): Unit = {
   println("Processing CSS assets")
   implicit val ctx = defaultCtx + names(
     "cssAsset" -> Function.function[Str] { name =>
-      Str(read(src/s"private-assets"/"css"/"${name.value}.css")) }
+      Str(read(src/s"private-assets"/"css"/s"${name.value}.css")) }
   )
 
   val css = Thera(read(src/"private-assets"/"css"/"all.css")).mkString
