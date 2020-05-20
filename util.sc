@@ -1,10 +1,7 @@
-import $ivy.`commons-io:commons-io:2.6`
 import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 
 import thera._
-
 import os._
-import org.apache.commons.io.IOUtils
 
 
 val src      = os.pwd/"src"
@@ -18,25 +15,12 @@ val compiled = os.pwd/"_site"
  */
 def pipeIntoCommand(cmd: String, input: String, workdir: Path,
   encoding: String = "utf8"): String = {
-  val proc = sys.runtime.exec(cmd, null, workdir.toIO)
-  val is   = proc.getInputStream
-  val os   = proc.getOutputStream
-  val es   = proc.getErrorStream
-
-  def closeAll(): Unit = {
-    os.close()
-    is.close()
-    es.close()
-  }
-
-  try {
-    IOUtils.write(input, os, encoding)
-    os.close()
-    val res = IOUtils.toString(is, encoding)
-    println(IOUtils.toString(es, encoding))
-    res
-  }
-  finally closeAll()
+  val p = os.proc(cmd).call(
+    cwd = workdir,
+    stdin = input
+  )
+  println(p.err.text)
+  p.out.text
 }
 
 def postMarkdownToHtml(str: String): String =
@@ -53,10 +37,9 @@ def pandocRaw(str: String): String =
   pipeIntoCommand("pandoc", str, compiled)
 
 
-def write(f: File, str: String): Unit = {
-  f.delete(true)
-  f.write(str)
-}
+def write(f: Path, str: String): Unit =
+  os.write.over(path, str,
+    createFolders = true, truncate = false)
 
 def pipeThera(tmls: Template*)(
   implicit ctx: ValueHierarchy): String =

@@ -3,6 +3,7 @@ import $ivy.`com.akmetiuk::thera:0.2.0-M1`
 import $file.post, post._
 import $file.util, util._
 
+import os._
 import thera._, ValueHierarchy.names
 
 
@@ -37,7 +38,7 @@ def build(): Unit = {
 def genStaticAssets(): Unit = {
   println("Copying static assets")
   for (f <- List("assets", "code", "CNAME", "favicon.png"))
-    src/f copyTo compiled/f
+    os.copy.over(src/f, compiled/f)
 }
 
 def genCss(): Unit = {
@@ -48,7 +49,7 @@ def genCss(): Unit = {
   )
 
   val css = Thera((src/"private-assets/css/all.css").contentAsString).mkString
-  write(compiled/"assets/all.css", css)
+  os.write(compiled/"assets/all.css", css)
 }
 
 def genPosts(): Unit = {
